@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, tap, throwError, catchError } from 'rxjs';
 import { Activity } from '../model/achievement';
-
-// في service/achievements-service.service.ts
 export interface PDFFile {
   _id?: string;
   pdfurl: string;
@@ -12,7 +10,6 @@ export interface PDFFile {
     fullname: string;
   };
   createdAt: string;
-  // إضافة الخصائص الجديدة
   generatedBy?: string;
   generatedAt?: string;
   filename?: string;
@@ -59,7 +56,6 @@ export class ActivityService {
     return headers;
   }
 
-  // ========== إدارة ملفات PDF ==========
   getAllPDFs(): Observable<{ success: boolean; pdfFiles: PDFFile[] }> {
     const headers = this.getAuthHeaders();
 
@@ -85,12 +81,10 @@ export class ActivityService {
       );
   }
 
-  // في الـ Service - أضف هذه الدالة
   downloadDOCXFromUrl(fileUrl: string, customName?: string): void {
     try {
       console.log('Downloading DOCX from URL:', fileUrl);
 
-      // استخدام الرابط مباشرة بدون أي تعديل
       const link = document.createElement('a');
       link.href = fileUrl;
       link.download =
@@ -100,14 +94,12 @@ export class ActivityService {
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
 
-      // إضافة الـ link للصفحة ونقره ثم إزالته
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (error) {
       console.error('Error downloading DOCX from URL:', error);
 
-      // محاولة بديلة باستخدام window.open
       try {
         window.open(fileUrl, '_blank');
       } catch (fallbackError) {
@@ -131,13 +123,11 @@ export class ActivityService {
       );
   }
 
-  // ========== إنشاء التقارير ==========
   generateReport(filters: ReportFilters): Observable<ReportGenerationResponse> {
     let params = new HttpParams()
       .set('startDate', filters.startDate)
       .set('endDate', filters.endDate);
 
-    // إضافة الفلاتر الاختيارية
     if (filters.MainCriteria) {
       params = params.set('MainCriteria', filters.MainCriteria);
     }
@@ -151,7 +141,6 @@ export class ActivityService {
       params = params.set('status', filters.status);
     }
 
-    // تحديد نوع التقرير (PDF أو DOCX)
     const endpoint =
       filters.reportType === 'docx' ? 'generate-docx' : 'generate-pdf';
 
@@ -238,7 +227,6 @@ export class ActivityService {
       );
   }
 
-  // ========== معاينة وتحميل الملفات ==========
   viewPDF(filename: string): Observable<Blob> {
     const url = `${this.API_BASE_URL}/view-pdf/${filename}`;
     const headers = this.getAuthHeaders();
@@ -284,13 +272,10 @@ export class ActivityService {
     );
   }
 
-  // ========== تحميل DOCX مباشرة من الـ URL ==========
-  // وأعدل الدالة downloadDOCXDirectly
   downloadDOCXDirectly(fileUrl: string, customName?: string): void {
     this.downloadDOCXFromUrl(fileUrl, customName);
   }
 
-  // ========== معالجة الملفات والروابط ==========
   private fixArabicUrl(url: string): string {
     try {
       if (url.includes('%25')) {
@@ -306,7 +291,6 @@ export class ActivityService {
     }
   }
 
-  // في الـ Service - أضف هذه الدالة
   async downloadDOCXWithFetch(
     fileUrl: string,
     customName?: string
@@ -322,7 +306,6 @@ export class ActivityService {
 
       const blob = await response.blob();
 
-      // إنشاء رابط تحميل
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = downloadUrl;
@@ -335,12 +318,10 @@ export class ActivityService {
       link.click();
       document.body.removeChild(link);
 
-      // تنظيف الذاكرة
       setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 100);
     } catch (error) {
       console.error('Error downloading DOCX with fetch:', error);
 
-      // الرجوع للطريقة العادية
       this.downloadDOCXFromUrl(fileUrl, customName);
     }
   }
@@ -361,7 +342,6 @@ export class ActivityService {
     return filename.toLowerCase().endsWith('.docx') ? 'docx' : 'pdf';
   }
 
-  // ========== التعامل مع نتائج التقرير ==========
   handleGeneratedReport(response: ReportGenerationResponse): void {
     if (response.success && response.file && response.filename) {
       const fileType = this.getFileTypeFromFilename(response.filename);
@@ -370,7 +350,6 @@ export class ActivityService {
         if (fileType === 'pdf') {
           this.openPDF(response.filename!);
         } else {
-          // لـ DOCX نستخدم التحميل المباشر
           this.downloadDOCXDirectly(response.file);
         }
       } else {
@@ -400,7 +379,6 @@ export class ActivityService {
     }
   }
 
-  // ========== إحصائيات التقارير ==========
   getReportStats(): Observable<{
     success: boolean;
     data: {
@@ -432,7 +410,6 @@ export class ActivityService {
       );
   }
 
-  // ========== أدوات مساعدة ==========
   cleanDescriptionForDisplay(description: string): string {
     if (!description) return '';
     if (description.includes('<') && description.includes('>')) {
@@ -456,7 +433,6 @@ export class ActivityService {
     return name || 'تقرير بدون اسم';
   }
 
-  // ========== الأمان ==========
   private handleUnauthorized(): void {
     console.warn('Unauthorized access - clearing storage');
     localStorage.removeItem('token');
@@ -468,7 +444,6 @@ export class ActivityService {
     }, 1000);
   }
 
-  // ========== باقي دوال إدارة الأنشطة (كما هي) ==========
   addActivity(data: FormData): Observable<any> {
     return this.http
       .post<any>(`${this.API_BASE_URL}/add`, data, {

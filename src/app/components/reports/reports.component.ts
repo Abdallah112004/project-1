@@ -28,7 +28,7 @@ interface ReportFilter {
   styleUrls: ['./reports.component.css'],
 })
 export class ReportsComponent implements OnInit {
-  showFilters: boolean = true;
+  showFilters: boolean = false;
   isLoading = false;
   isLoadingPDFs = false;
   showDateError = false;
@@ -38,7 +38,7 @@ export class ReportsComponent implements OnInit {
   reportType: 'pdf' | 'docx' = 'pdf';
   fileTypeFilter: string = 'all';
   filteredPDFs: PDFFile[] = [];
-
+  generatedReport: any = null;
   filters: ReportFilter = {
     startDate: '',
     endDate: '',
@@ -48,10 +48,7 @@ export class ReportsComponent implements OnInit {
     status: '',
   };
 
-  generatedReport: any = null;
   pdfFiles: PDFFile[] = [];
-  selectedPDF: PDFFile | null = null;
-
   mainCriteriaList: MainCriteria[] = [];
   subCriteriaList: SubCriteria[] = [];
   allSubCriteria: SubCriteria[] = [];
@@ -333,8 +330,6 @@ export class ReportsComponent implements OnInit {
     }
   }
 
-  
-
   extractFilenameFromUrl(url: string): string {
     return this.activityService.extractFilenameFromUrl(url);
   }
@@ -360,23 +355,6 @@ export class ReportsComponent implements OnInit {
       return pdf.userId.fullname;
     }
     return 'مستخدم غير معروف';
-  }
-
-  clearFilters() {
-    this.filters = {
-      startDate: '',
-      endDate: '',
-      MainCriteria: '',
-      SubCriteria: '',
-      user: '',
-      status: '',
-    };
-    this.reportType = 'pdf';
-    this.subCriteriaList = [];
-    this.generatedReport = null;
-    this.showDateError = false;
-    this.dateRequiredError = false;
-    this.showSuccess('تم مسح جميع الفلاتر');
   }
 
   isDateComplete(): boolean {
@@ -485,14 +463,5 @@ export class ReportsComponent implements OnInit {
       confirmButtonColor: '#d33',
     });
   }
-
-  private showInfo(message: string) {
-    Swal.fire({
-      title: 'معلومة',
-      text: message,
-      icon: 'info',
-      confirmButtonText: 'حسناً',
-      confirmButtonColor: '#3085d6',
-    });
-  }
+  
 }

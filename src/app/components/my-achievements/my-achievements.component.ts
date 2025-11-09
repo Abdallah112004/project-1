@@ -97,12 +97,10 @@ export class MyAchievementsComponent implements OnInit {
   getCleanDescription(description: string): string {
     if (!description) return 'لا يوجد وصف';
 
-    // إذا كان الوصف يحتوي على HTML tags، نحوله إلى نص عادي
     if (description.includes('<') && description.includes('>')) {
       return this.stripHtmlTags(description);
     }
 
-    // إذا كان نص عادي، نعيده كما هو
     return description;
   }
 

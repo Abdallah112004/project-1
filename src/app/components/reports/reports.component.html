@@ -8,378 +8,392 @@
                     <h1><i class="fas fa-chart-pie"></i> تقارير الانجازات</h1>
                     <p class="header-description">إنشاء تقارير PDF و DOCX للانجازات حسب الفلتره المطلوبة</p>
                 </div>
+                <div class="header-mobile-actions">
+                    <button class="btn btn-mobile-filter" (click)="toggleFilters()">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                </div>
             </div>
         </header>
 
-        <div class="card filter-card" [class.expanded]="showFilters">
-            <div class="card-header">
-                <h5><i class="fas fa-sliders-h"></i> فلاتر التقرير</h5>
-                <div class="header-actions">
-                    <button class="btn btn-outline" (click)="toggleFilters()">
-                        <i class="fas" [class.fa-filter]="!showFilters" [class.fa-times]="showFilters"></i>
-                        {{ showFilters ? 'إخفاء الفلاتر' : 'عرض الفلاتر' }}
-                    </button>
-                </div>
-            </div>
-
-            <div class="card-body" *ngIf="showFilters">
-                <!-- نوع التقرير -->
-                <div class="report-type-section">
-                    <h6 class="section-title">
-                        <i class="fas fa-file-alt text-primary"></i>
-                        نوع التقرير
-                        <span class="required-badge">إجباري</span>
-                    </h6>
-                    <div class="row">
-                        <div class="col-lg-6 col-md-12">
-                            <div class="form-group">
-                                <label class="form-label required">
-                                    اختر نوع التقرير
-                                    <span class="required-star">*</span>
-                                </label>
-                                <div class="report-type-options">
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" id="pdfType"
-                                            [(ngModel)]="reportType" value="pdf" name="reportType" checked>
-                                        <label class="form-check-label" for="pdfType">
-                                            <i class="fas fa-file-pdf text-danger"></i>
-                                            تقرير PDF
-                                        </label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" id="docxType"
-                                            [(ngModel)]="reportType" value="docx" name="reportType">
-                                        <label class="form-check-label" for="docxType">
-                                            <i class="fas fa-file-word text-primary"></i>
-                                            تقرير DOCX
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="date-section required-section">
-                    <h6 class="section-title">
-                        <i class="fas fa-calendar-day text-primary"></i>
-                        نطاق التاريخ
-                        <span class="required-badge">إجباري</span>
-                    </h6>
-                    <div class="row">
-                        <div class="col-lg-3 col-md-6">
-                            <div class="form-group">
-                                <label class="form-label required">
-                                    من تاريخ
-                                    <span class="required-star">*</span>
-                                </label>
-                                <div class="input-with-icon">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    <input type="date" class="form-control" [(ngModel)]="filters.startDate"
-                                        name="startDate" [max]="filters.endDate || maxDate"
-                                        [class.is-invalid]="dateRequiredError || showDateError">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-3 col-md-6">
-                            <div class="form-group">
-                                <label class="form-label required">
-                                    إلى تاريخ
-                                    <span class="required-star">*</span>
-                                </label>
-                                <div class="input-with-icon">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    <input type="date" class="form-control" [(ngModel)]="filters.endDate" name="endDate"
-                                        [min]="filters.startDate" [max]="maxDate"
-                                        [class.is-invalid]="dateRequiredError || showDateError">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6 col-md-12">
-                            <div class="date-actions">
-                                <div class="date-info" *ngIf="isDateComplete() && !showDateError">
-                                    <i class="fas fa-check-circle text-success"></i>
-                                    <span>تم تحديد النطاق الزمني</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="filters-section optional-section">
-                    <h6 class="section-title">
-                        <i class="fas fa-filter text-secondary"></i>
-                        فلاتر إضافية
-                        <span class="optional-badge">اختياري</span>
-                    </h6>
-                    <div class="row">
-                        <div class="col-lg-3 col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">المستخدم</label>
-                                <div class="input-with-icon">
-                                    <i class="fas fa-user"></i>
-                                    <select class="form-control" [(ngModel)]="filters.user" name="user">
-                                        <option value="">جميع المستخدمين</option>
-                                        <option *ngFor="let user of usersList" [value]="user._id">
-                                            {{ user.fullname }}
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-3 col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">المعيار الرئيسي</label>
-                                <div class="input-with-icon">
-                                    <i class="fas fa-list-alt"></i>
-                                    <select class="form-control" [(ngModel)]="filters.MainCriteria"
-                                        (change)="onMainCriteriaChange()" name="MainCriteria">
-                                        <option value="">جميع المعايير</option>
-                                        <option *ngFor="let criteria of mainCriteriaList" [value]="criteria._id">
-                                            {{ criteria.name }}
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-3 col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">المعيار الفرعي</label>
-                                <div class="input-with-icon">
-                                    <i class="fas fa-list"></i>
-                                    <select class="form-control" [(ngModel)]="filters.SubCriteria" name="SubCriteria"
-                                        [disabled]="!filters.MainCriteria || subCriteriaList.length === 0">
-                                        <option value="">جميع المعايير الفرعية</option>
-                                        <option *ngFor="let sub of subCriteriaList" [value]="sub._id">
-                                            {{ sub.name }}
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-3 col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">الحالة</label>
-                                <div class="input-with-icon">
-                                    <i class="fas fa-check-circle"></i>
-                                    <select class="form-control" [(ngModel)]="filters.status" name="status">
-                                        <option value="">جميع الحالات</option>
-                                        <option value="معتمد">معتمد</option>
-                                        <option value="قيد المراجعة">قيد المراجعة</option>
-                                        <option value="مرفوض">مرفوض</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div *ngIf="dateRequiredError" class="alert alert-danger mt-3">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <strong>تاريخ البداية وتاريخ النهاية مطلوبان</strong> - يرجى تحديد النطاق الزمني للتقرير
-                </div>
-
-                <div *ngIf="showDateError" class="alert alert-danger mt-3">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <strong>خطأ في التواريخ</strong> - تاريخ البداية يجب أن يكون قبل تاريخ النهاية
-                </div>
-
-                <div class="generate-report-section">
-                    <div class="generate-actions">
-                        <button class="btn btn-primary btn-generate" (click)="generateReportWithValidation()"
-                            [disabled]="isLoading || showDateError || dateRequiredError || !isDateComplete()">
-                            <span class="btn-content">
-                                <i class="fas" [class.fa-file-pdf]="!isLoading && reportType === 'pdf'"
-                                    [class.fa-file-word]="!isLoading && reportType === 'docx'"
-                                    [class.fa-spinner]="isLoading" [class.fa-spin]="isLoading"></i>
-                                {{ isLoading ? 'جاري إنشاء التقرير...' : (reportType === 'pdf' ? 'إنشاء تقرير PDF' :
-                                'إنشاء تقرير DOCX') }}
-                            </span>
-                        </button>
-
-                        <button class="btn btn-outline-secondary" (click)="clearFilters()" [disabled]="isLoading">
-                            <i class="fas fa-broom"></i>
-                            مسح الفلاتر
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="report-results" class="card result-card" *ngIf="generatedReport">
-            <div class="card-header">
-                <h5><i class="fas fa-clipboard-check"></i> نتائج التقرير</h5>
-                <div class="card-actions">
-                    <button class="btn btn-sm btn-outline-secondary" (click)="toggleReportResults()">
-                        <i class="fas" [class.fa-chevron-up]="showReportResults"
-                            [class.fa-chevron-down]="!showReportResults"></i>
-                        {{ showReportResults ? 'إخفاء' : 'عرض' }}
-                    </button>
-                </div>
-            </div>
-
-            <div class="card-body" *ngIf="showReportResults">
-                <div *ngIf="generatedReport.success" class="report-success">
-                    <div class="success-icon">
-                        <i class="fas" [class.fa-file-pdf]="generatedReport.fileType === 'pdf'"
-                            [class.fa-file-word]="generatedReport.fileType === 'docx'"></i>
-                    </div>
-                    <div class="success-content">
-                        <h4>تم إنشاء التقرير بنجاح!</h4>
-                        <div class="report-summary">
-                            <div class="summary-item">
-                                <span class="summary-label">نوع التقرير:</span>
-                                <span class="summary-value">
-                                    <span class="badge" [class.badge-pdf]="generatedReport.fileType === 'pdf'"
-                                        [class.badge-docx]="generatedReport.fileType === 'docx'">
-                                        {{ generatedReport.fileType === 'pdf' ? 'PDF' : 'DOCX' }}
-                                    </span>
-                                </span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-label">ملخص الفلاتر:</span>
-                                <span class="summary-value">{{ getFilterSummary() }}</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-label">تم الإنشاء بواسطة:</span>
-                                <span class="summary-value">{{ getCurrentUserName() }}</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-label">تاريخ الإنشاء:</span>
-                                <span class="summary-value">{{ formatDate(currentDate) }}</span>
-                            </div>
-                        </div>
-
-                        <div class="download-section">
-                            <h6>خيارات التحميل:</h6>
-                            <div class="download-options">
-                                <!-- لملفات PDF فقط: عرض زر الفتح -->
-                                <button *ngIf="generatedReport.fileType === 'pdf'" class="btn btn-success"
-                                    (click)="viewReport(generatedReport.file, generatedReport.fileType)">
-                                    <i class="fas fa-external-link-alt"></i> فتح التقرير
-                                </button>
-
-                                <!-- لجميع الملفات: عرض زر التحميل -->
-                                <button class="btn btn-outline-success"
-                                    (click)="downloadReport(generatedReport.file, generatedReport.fileType)">
-                                    <i class="fas fa-download"></i> تحميل مباشر
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-12 col-xxl-10">
+                    <div class="card filter-card" [class.expanded]="showFilters">
+                        <div class="card-header">
+                            <h5><i class="fas fa-sliders-h"></i> فلاتر التقرير</h5>
+                            <div class="header-actions">
+                                <button class="btn btn-outline btn-toggle-filters" (click)="toggleFilters()">
+                                    <i class="fas" [class.fa-filter]="!showFilters" [class.fa-times]="showFilters"></i>
+                                    <span class="btn-text">{{ showFilters ? 'إخفاء الفلاتر' : 'عرض الفلاتر' }}</span>
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div *ngIf="!generatedReport.success" class="report-error">
-                    <div class="error-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="error-content">
-                        <h4>فشل في إنشاء التقرير</h4>
-                        <p class="error-message">{{ generatedReport.message || 'حدث خطأ غير معروف' }}</p>
-                        <div class="error-suggestions" *ngIf="generatedReport.message?.includes('لا توجد انجازات')">
-                            <p class="suggestion-title">اقتراحات:</p>
-                            <ul class="suggestion-list">
-                                <li>توسيع نطاق التاريخ</li>
-                                <li>تغيير الفلاتر الاختيارية</li>
-                                <li>التحقق من توفر الأنشطة في الفترة المحددة</li>
-                            </ul>
-                        </div>
-                        <button class="btn btn-secondary mt-2" (click)="generateReport()">
-                            <i class="fas fa-redo"></i> إعادة المحاولة
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card previous-reports-card">
-            <div class="card-header">
-                <h5><i class="fas fa-history"></i> التقارير السابقة</h5>
-                <div class="card-actions">
-                    <div class="filter-actions">
-                        <select class="form-control form-control-sm" [(ngModel)]="fileTypeFilter"
-                            (change)="filterPDFs()" style="width: auto;">
-                            <option value="all">جميع الأنواع</option>
-                            <option value="pdf">PDF فقط</option>
-                            <option value="docx">DOCX فقط</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-sm btn-outline-secondary" (click)="togglePreviousReports()">
-                        <i class="fas" [class.fa-chevron-up]="showPreviousReports"
-                            [class.fa-chevron-down]="!showPreviousReports"></i>
-                        {{ showPreviousReports ? 'إخفاء' : 'عرض' }}
-                    </button>
-                </div>
-            </div>
-
-            <div class="card-body" *ngIf="showPreviousReports">
-                <div *ngIf="isLoadingPDFs" class="loading-pdfs">
-                    <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
-                    <p>جاري تحميل التقارير السابقة...</p>
-                </div>
-
-                <div *ngIf="!isLoadingPDFs && filteredPDFs.length === 0" class="no-pdfs">
-                    <i class="fas fa-file-pdf fa-3x text-muted"></i>
-                    <p>لا توجد تقارير سابقة</p>
-                </div>
-
-                <div *ngIf="!isLoadingPDFs && filteredPDFs.length > 0" class="pdfs-list">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>المستخدم</th>
-                                    <th>نوع التقرير</th>
-                                    <th>تاريخ الإنشاء</th>
-                                    <th>الإجراءات</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let pdf of filteredPDFs">
-                                    <td>
-                                        <div class="user-info">
-                                            <i class="fas fa-user-circle"></i>
-                                            <div class="user-details">
-                                                <strong>{{ getUserDisplayName(pdf) }}</strong>
+                        <div class="card-body" *ngIf="showFilters">
+                            <div class="report-type-section">
+                                <h6 class="section-title">
+                                    <i class="fas fa-file-alt text-primary"></i>
+                                    نوع التقرير
+                                    <span class="required-badge">إجباري</span>
+                                </h6>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label class="form-label required">
+                                                اختر نوع التقرير
+                                                <span class="required-star">*</span>
+                                            </label>
+                                            <div class="report-type-options">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" id="pdfType"
+                                                        [(ngModel)]="reportType" value="pdf" name="reportType" checked>
+                                                    <label class="form-check-label" for="pdfType">
+                                                        <i class="fas fa-file-pdf text-danger"></i>
+                                                        تقرير PDF
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" id="docxType"
+                                                        [(ngModel)]="reportType" value="docx" name="reportType">
+                                                    <label class="form-check-label" for="docxType">
+                                                        <i class="fas fa-file-word text-primary"></i>
+                                                        تقرير DOCX
+                                                    </label>
+                                                </div>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge" [class.badge-pdf]="getFileType(pdf) === 'pdf'"
-                                            [class.badge-docx]="getFileType(pdf) === 'docx'">
-                                            {{ getFileType(pdf) === 'pdf' ? 'PDF' : 'DOCX' }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="date-info">
-                                            <i class="fas fa-calendar"></i>
-                                            {{ formatDate(pdf.createdAt) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="date-section required-section">
+                                <h6 class="section-title">
+                                    <i class="fas fa-calendar-day text-primary"></i>
+                                    نطاق التاريخ
+                                    <span class="required-badge">إجباري</span>
+                                </h6>
+                                <div class="row">
+                                    <div class="col-12 col-sm-6 col-lg-3">
+                                        <div class="form-group">
+                                            <label class="form-label required">
+                                                من تاريخ
+                                                <span class="required-star">*</span>
+                                            </label>
+                                            <div class="input-with-icon">
+                                                <i class="fas fa-calendar-alt"></i>
+                                                <input type="date" class="form-control" [(ngModel)]="filters.startDate"
+                                                    name="startDate" [max]="filters.endDate || maxDate"
+                                                    [class.is-invalid]="dateRequiredError || showDateError">
+                                            </div>
                                         </div>
-                                    </td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <!-- لملفات PDF فقط: عرض زر الفتح -->
-                                            <button *ngIf="getFileType(pdf) === 'pdf'" class="btn btn-sm btn-success"
-                                                (click)="openReport(pdf.pdfurl, getFileType(pdf))" title="فتح PDF">
-                                                <i class="fas fa-eye"></i>
+                                    </div>
+
+                                    <div class="col-12 col-sm-6 col-lg-3">
+                                        <div class="form-group">
+                                            <label class="form-label required">
+                                                إلى تاريخ
+                                                <span class="required-star">*</span>
+                                            </label>
+                                            <div class="input-with-icon">
+                                                <i class="fas fa-calendar-alt"></i>
+                                                <input type="date" class="form-control" [(ngModel)]="filters.endDate"
+                                                    name="endDate" [min]="filters.startDate" [max]="maxDate"
+                                                    [class.is-invalid]="dateRequiredError || showDateError">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-lg-6">
+                                        <div class="date-actions">
+                                            <div class="date-info" *ngIf="isDateComplete() && !showDateError">
+                                                <i class="fas fa-check-circle text-success"></i>
+                                                <span>تم تحديد النطاق الزمني</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="filters-section optional-section">
+                                <h6 class="section-title">
+                                    <i class="fas fa-filter text-secondary"></i>
+                                    فلاتر إضافية
+                                    <span class="optional-badge">اختياري</span>
+                                </h6>
+                                <div class="row">
+                                    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                                        <div class="form-group">
+                                            <label class="form-label">المستخدم</label>
+                                            <div class="input-with-icon">
+                                                <i class="fas fa-user"></i>
+                                                <select class="form-control" [(ngModel)]="filters.user" name="user">
+                                                    <option value="">جميع المستخدمين</option>
+                                                    <option *ngFor="let user of usersList" [value]="user._id">
+                                                        {{ user.fullname }}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                                        <div class="form-group">
+                                            <label class="form-label">المعيار الرئيسي</label>
+                                            <div class="input-with-icon">
+                                                <i class="fas fa-list-alt"></i>
+                                                <select class="form-control" [(ngModel)]="filters.MainCriteria"
+                                                    (change)="onMainCriteriaChange()" name="MainCriteria">
+                                                    <option value="">جميع المعايير</option>
+                                                    <option *ngFor="let criteria of mainCriteriaList"
+                                                        [value]="criteria._id">
+                                                        {{ criteria.name }}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                                        <div class="form-group">
+                                            <label class="form-label">المعيار الفرعي</label>
+                                            <div class="input-with-icon">
+                                                <i class="fas fa-list"></i>
+                                                <select class="form-control" [(ngModel)]="filters.SubCriteria"
+                                                    name="SubCriteria"
+                                                    [disabled]="!filters.MainCriteria || subCriteriaList.length === 0">
+                                                    <option value="">جميع المعايير الفرعية</option>
+                                                    <option *ngFor="let sub of subCriteriaList" [value]="sub._id">
+                                                        {{ sub.name }}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div *ngIf="dateRequiredError" class="alert alert-danger mt-3">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>تاريخ البداية وتاريخ النهاية مطلوبان</strong> - يرجى تحديد النطاق الزمني للتقرير
+                            </div>
+
+                            <div *ngIf="showDateError" class="alert alert-danger mt-3">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>خطأ في التواريخ</strong> - تاريخ البداية يجب أن يكون قبل تاريخ النهاية
+                            </div>
+
+                            <div class="generate-report-section">
+                                <div class="generate-actions">
+                                    <button class="btn btn-primary btn-generate"
+                                        (click)="generateReportWithValidation()"
+                                        [disabled]="isLoading || showDateError || dateRequiredError || !isDateComplete()">
+                                        <span class="btn-content">
+                                            <i class="fas" [class.fa-file-pdf]="!isLoading && reportType === 'pdf'"
+                                                [class.fa-file-word]="!isLoading && reportType === 'docx'"
+                                                [class.fa-spinner]="isLoading" [class.fa-spin]="isLoading"></i>
+                                            <span class="btn-text">
+                                                {{ isLoading ? 'جاري إنشاء التقرير...' : (reportType === 'pdf' ? 'إنشاء تقرير PDF' :
+                                                'إنشاء تقرير DOCX') }}
+                                            </span>
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="report-results" class="card result-card" *ngIf="generatedReport">
+                        <div class="card-header">
+                            <h5><i class="fas fa-clipboard-check"></i> نتائج التقرير</h5>
+                            <div class="card-actions">
+                                <button class="btn btn-sm btn-outline-secondary btn-toggle-results"
+                                    (click)="toggleReportResults()">
+                                    <i class="fas" [class.fa-chevron-up]="showReportResults"
+                                        [class.fa-chevron-down]="!showReportResults"></i>
+                                    <span class="btn-text">{{ showReportResults ? 'إخفاء' : 'عرض' }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card-body" *ngIf="showReportResults">
+                            <div *ngIf="generatedReport.success" class="report-success">
+                                <div class="success-icon">
+                                    <i class="fas" [class.fa-file-pdf]="generatedReport.fileType === 'pdf'"
+                                        [class.fa-file-word]="generatedReport.fileType === 'docx'"></i>
+                                </div>
+                                <div class="success-content">
+                                    <h4>تم إنشاء التقرير بنجاح!</h4>
+                                    <div class="report-summary">
+                                        <div class="summary-item">
+                                            <span class="summary-label">نوع التقرير:</span>
+                                            <span class="summary-value">
+                                                <span class="badge"
+                                                    [class.badge-pdf]="generatedReport.fileType === 'pdf'"
+                                                    [class.badge-docx]="generatedReport.fileType === 'docx'">
+                                                    {{ generatedReport.fileType === 'pdf' ? 'PDF' : 'DOCX' }}
+                                                </span>
+                                            </span>
+                                        </div>
+                                        <div class="summary-item">
+                                            <span class="summary-label">ملخص الفلاتر:</span>
+                                            <span class="summary-value">{{ getFilterSummary() }}</span>
+                                        </div>
+                                        <div class="summary-item">
+                                            <span class="summary-label">تم الإنشاء بواسطة:</span>
+                                            <span class="summary-value">{{ getCurrentUserName() }}</span>
+                                        </div>
+                                        <div class="summary-item">
+                                            <span class="summary-label">تاريخ الإنشاء:</span>
+                                            <span class="summary-value">{{ formatDate(currentDate) }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="download-section">
+                                        <h6>خيارات التحميل:</h6>
+                                        <div class="download-options">
+                                            <button *ngIf="generatedReport.fileType === 'pdf'" class="btn btn-success"
+                                                (click)="viewReport(generatedReport.file, generatedReport.fileType)">
+                                                <i class="fas fa-external-link-alt"></i>
+                                                <span>فتح التقرير</span>
                                             </button>
 
-                                            <!-- لجميع الملفات: عرض زر التحميل -->
-                                            <button class="btn btn-sm btn-outline-primary"
-                                                (click)="downloadReport(pdf.pdfurl, getFileType(pdf))"
-                                                [title]="'تحميل ' + (getFileType(pdf) === 'pdf' ? 'PDF' : 'DOCX')">
+                                            <button class="btn btn-outline-success"
+                                                (click)="downloadReport(generatedReport.file, generatedReport.fileType)">
                                                 <i class="fas fa-download"></i>
+                                                <span>تحميل مباشر</span>
                                             </button>
                                         </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div *ngIf="!generatedReport.success" class="report-error">
+                                <div class="error-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="error-content">
+                                    <h4>فشل في إنشاء التقرير</h4>
+                                    <p class="error-message">{{ generatedReport.message || 'حدث خطأ غير معروف' }}</p>
+                                    <div class="error-suggestions"
+                                        *ngIf="generatedReport.message?.includes('لا توجد انجازات')">
+                                        <p class="suggestion-title">اقتراحات:</p>
+                                        <ul class="suggestion-list">
+                                            <li>توسيع نطاق التاريخ</li>
+                                            <li>تغيير الفلاتر الاختيارية</li>
+                                            <li>التحقق من توفر الأنشطة في الفترة المحددة</li>
+                                        </ul>
+                                    </div>
+                                    <button class="btn btn-secondary mt-2" (click)="generateReport()">
+                                        <i class="fas fa-redo"></i>
+                                        <span>إعادة المحاولة</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card previous-reports-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-history"></i> التقارير السابقة</h5>
+                            <div class="card-actions">
+                                <div class="filter-actions">
+                                    <div class="file-type-filter">
+                                        <span class="filter-label">
+                                            <i class="fas fa-filter"></i>
+                                            <span class="filter-text">تصفية حسب النوع:</span>
+                                        </span>
+                                        <div class="filter-select-wrapper">
+                                            <select class="form-control form-control-sm file-type-select"
+                                                [(ngModel)]="fileTypeFilter" (change)="filterPDFs()">
+                                                <option value="all">جميع الأنواع</option>
+                                                <option value="pdf">PDF فقط</option>
+                                                <option value="docx">DOCX فقط</option>
+                                            </select>
+                                            <i class="fas fa-chevron-down select-arrow"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button class="btn btn-sm btn-outline-secondary btn-toggle-reports"
+                                    (click)="togglePreviousReports()">
+                                    <i class="fas" [class.fa-chevron-up]="showPreviousReports"
+                                        [class.fa-chevron-down]="!showPreviousReports"></i>
+                                    <span class="btn-text">{{ showPreviousReports ? 'إخفاء' : 'عرض' }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card-body" *ngIf="showPreviousReports">
+                            <div *ngIf="isLoadingPDFs" class="loading-pdfs">
+                                <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                                <p>جاري تحميل التقارير السابقة...</p>
+                            </div>
+
+                            <div *ngIf="!isLoadingPDFs && filteredPDFs.length === 0" class="no-pdfs">
+                                <i class="fas fa-file-pdf fa-3x text-muted"></i>
+                                <p>لا توجد تقارير سابقة</p>
+                            </div>
+
+                            <div *ngIf="!isLoadingPDFs && filteredPDFs.length > 0" class="pdfs-list">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th width="60">#</th>
+                                                <th>المستخدم</th>
+                                                <th>نوع التقرير</th>
+                                                <th>تاريخ الإنشاء</th>
+                                                <th width="120">الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let pdf of filteredPDFs; let i = index">
+                                                <td class="text-center">
+                                                    <span class="report-number">{{ i + 1 }}</span>
+                                                </td>
+                                                <td>
+                                                    <div class="user-info">
+                                                        <i class="fas fa-user-circle"></i>
+                                                        <div class="user-details">
+                                                            <strong>{{ getUserDisplayName(pdf) }}</strong>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge" [class.badge-pdf]="getFileType(pdf) === 'pdf'"
+                                                        [class.badge-docx]="getFileType(pdf) === 'docx'">
+                                                        {{ getFileType(pdf) === 'pdf' ? 'PDF' : 'DOCX' }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="date-info">
+                                                        <i class="fas fa-calendar"></i>
+                                                        <span>{{ formatDate(pdf.createdAt) }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="action-buttons">
+                                                        <button *ngIf="getFileType(pdf) === 'pdf'"
+                                                            class="btn btn-sm btn-success"
+                                                            (click)="openReport(pdf.pdfurl, getFileType(pdf))"
+                                                            title="فتح PDF">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+
+                                                        <button class="btn btn-sm btn-outline-primary"
+                                                            (click)="downloadReport(pdf.pdfurl, getFileType(pdf))"
+                                                            [title]="'تحميل ' + (getFileType(pdf) === 'pdf' ? 'PDF' : 'DOCX')">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
