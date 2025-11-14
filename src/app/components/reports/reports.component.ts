@@ -36,7 +36,6 @@ type DropdownType = 'users' | 'mainCriteria' | 'subCriteria' | 'status';
   styleUrls: ['./reports.component.css'],
 })
 export class ReportsComponent implements OnInit, OnDestroy {
-  // حالة العرض
   showFilters: boolean = false;
   isLoading = false;
   isLoadingPDFs = false;
@@ -44,14 +43,10 @@ export class ReportsComponent implements OnInit, OnDestroy {
   dateRequiredError = false;
   showReportResults = false;
   showPreviousReports = true;
-
-  // التواريخ
   maxDate: string;
   currentDate: string;
   reportType: 'pdf' | 'docx' = 'pdf';
   fileTypeFilter: string = 'all';
-
-  // البيانات
   filters: ReportFilter = {
     startDate: '',
     endDate: '',
@@ -66,8 +61,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
   generatedReport: any = null;
   mainCriteriaList: MainCriteria[] = [];
   allSubCriteria: SubCriteria[] = [];
-
-  // خيارات الفلاتر
   userOptions: DropdownOption[] = [];
   mainCriteriaOptions: DropdownOption[] = [];
   subCriteriaOptions: DropdownOption[] = [];
@@ -77,7 +70,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
     { value: 'قيد المراجعة', label: 'قيد المراجعة', selected: false },
   ];
 
-  // حالة Dropdowns
   dropdownStates: Record<DropdownType, boolean> = {
     users: false,
     mainCriteria: false,
@@ -85,7 +77,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
     status: false,
   };
 
-  // مصطلحات البحث
   searchTerms: Record<DropdownType, string> = {
     users: '',
     mainCriteria: '',
@@ -93,7 +84,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
     status: '',
   };
 
-  // الخيارات المصفاة
   filteredUserOptions: DropdownOption[] = [];
   filteredMainCriteriaOptions: DropdownOption[] = [];
   filteredSubCriteriaOptions: DropdownOption[] = [];
@@ -119,7 +109,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
     this.removeBodyOverflow();
   }
 
-  // ========== إدارة الـ Dropdowns ==========
   isAnyDropdownOpen(): boolean {
     return Object.values(this.dropdownStates).some((state) => state);
   }
@@ -139,7 +128,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
     document.body.classList.remove('dropdown-open');
   }
 
-  // ========== تحميل البيانات ==========
   loadAllData() {
     this.loadUsers();
     this.loadMainCriteria();
@@ -207,7 +195,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ========== إدارة الفلاتر ==========
   updateSubCriteriaOptions() {
     const selectedMainCriteria = this.mainCriteriaOptions
       .filter((item) => item.selected)
@@ -253,7 +240,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
       .map((item) => item.value);
   }
 
-  // ========== إدارة الـ Dropdowns ==========
   initializeFilteredOptions() {
     this.filteredUserOptions = [...this.userOptions];
     this.filteredMainCriteriaOptions = [...this.mainCriteriaOptions];
@@ -415,7 +401,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ========== إدارة الفلاتر ==========
   clearAllFilters() {
     this.userOptions.forEach((item) => (item.selected = false));
     this.mainCriteriaOptions.forEach((item) => (item.selected = false));
@@ -443,14 +428,13 @@ export class ReportsComponent implements OnInit, OnDestroy {
     this.showPreviousReports = !this.showPreviousReports;
   }
 
-  // ========== إدارة التقارير ==========
   loadAllPDFs(): void {
     this.isLoadingPDFs = true;
     this.activityService.getAllPDFs().subscribe({
       next: (response) => {
         this.isLoadingPDFs = false;
         if (response.success) {
-          this.pdfFiles = response.pdfFiles || [];
+          this.pdfFiles = (response.pdfFiles || []).reverse();
           this.filterPDFs();
         } else {
           this.showError('فشل في تحميل التقارير السابقة');
@@ -478,7 +462,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
     return this.activityService.getFileTypeFromFilename(pdf.pdfurl);
   }
 
-  // ========== التحقق من الصحة ==========
   validateFilters(): boolean {
     if (!this.filters.startDate || !this.filters.endDate) {
       this.dateRequiredError = true;
@@ -511,9 +494,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  // ========== إنشاء التقارير ==========
   generateReportWithValidation() {
-    this.debugFilters(); // أضف هذا السطر
+    this.debugFilters();
 
     if (!this.validateFilters()) {
       return;
@@ -584,11 +566,9 @@ export class ReportsComponent implements OnInit, OnDestroy {
   cleanFiltersBeforeSend(): any {
     const cleanedFilters: any = {};
 
-    // التواريخ (مطلوبة)
     cleanedFilters.startDate = this.filters.startDate;
     cleanedFilters.endDate = this.filters.endDate;
 
-    // الفلاتر الاختيارية - نرسلها فقط إذا كانت محددة
     if (this.filters.MainCriteria && this.filters.MainCriteria.length > 0) {
       cleanedFilters.MainCriteria = this.filters.MainCriteria.join(',');
     }
@@ -598,18 +578,17 @@ export class ReportsComponent implements OnInit, OnDestroy {
     }
 
     if (this.filters.users && this.filters.users.length > 0) {
-      cleanedFilters.user = this.filters.users.join(','); // لاحظ: 'user' وليس 'users'
+      cleanedFilters.user = this.filters.users.join(',');
     }
 
     if (this.filters.status && this.filters.status.length > 0) {
       cleanedFilters.status = this.filters.status.join(',');
     }
 
-    console.log('الفلاتر المرسلة:', cleanedFilters); // للت debug
+    console.log('الفلاتر المرسلة:', cleanedFilters);
     return cleanedFilters;
   }
 
-  // أضف هذه الدالة لعرض الفلاتر قبل الإرسال
   debugFilters(): void {
     console.log('=== تصحيح الفلاتر ===');
     console.log('التواريخ:', {
@@ -643,7 +622,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
     console.log('الفلاتر النهائية المرسلة:', cleaned);
   }
 
-  // ========== إدارة الملفات ==========
   viewReport(fileUrl: string, fileType: 'pdf' | 'docx') {
     try {
       if (fileType === 'pdf') {
@@ -692,7 +670,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ========== وظائف الحذف ==========
   confirmDeleteReport(pdf: PDFFile): void {
     const reportName = this.getFileName(pdf);
     const reportType = this.getFileType(pdf) === 'pdf' ? 'PDF' : 'DOCX';
@@ -735,11 +712,9 @@ export class ReportsComponent implements OnInit, OnDestroy {
         if (response.success) {
           this.showSuccess('تم حذف التقرير بنجاح');
 
-          // تحديث القائمة
           this.pdfFiles = this.pdfFiles.filter((item) => item._id !== pdf._id);
           this.filterPDFs();
 
-          // إذا كان الملف المحذوف هو الملف المعروض حالياً، نقوم بإخفاء النتائج
           if (
             this.generatedReport &&
             this.generatedReport.file === pdf.pdfurl
@@ -847,7 +822,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ========== دوال مساعدة ==========
   extractFilenameFromUrl(url: string): string {
     return this.activityService.extractFilenameFromUrl(url);
   }

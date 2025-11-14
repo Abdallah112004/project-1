@@ -31,7 +31,6 @@
                         </div>
 
                         <div class="card-body" *ngIf="showFilters">
-                            <!-- الفلاتر الإضافية مع Dropdown وبحث -->
                             <div class="filters-section optional-section">
                                 <h6 class="section-title">
                                     <i class="fas fa-filter text-muted"></i>
@@ -45,7 +44,6 @@
                                 </h6>
 
                                 <div class="simple-filters-grid">
-                                    <!-- فلتر المستخدمين -->
                                     <div class="simple-filter-group">
                                         <label class="simple-filter-label">
                                             المستخدمين
@@ -101,7 +99,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- فلتر المعايير الرئيسية -->
                                     <div class="simple-filter-group">
                                         <label class="simple-filter-label">
                                             المعايير الرئيسية
@@ -161,7 +158,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- فلتر المعايير الفرعية -->
                                     <div class="simple-filter-group">
                                         <label class="simple-filter-label">
                                             المعايير الفرعية
@@ -351,7 +347,6 @@
                         </div>
                     
                         <div class="card-body" *ngIf="showReportResults">
-                            <!-- حالة النجاح -->
                             <div *ngIf="generatedReport.success" class="report-success">
                                 <div class="success-icon">
                                     <i class="fas" [class.fa-file-pdf]="generatedReport.fileType === 'pdf'"
@@ -376,6 +371,7 @@
                                             <span class="summary-label">ملخص الفلاتر:</span>
                                             <span class="summary-value">{{ getFilterSummary() }}</span>
                                         </div>
+                    
                     
                                         <div class="summary-item">
                                             <span class="summary-label">تاريخ الإنشاء:</span>
@@ -402,7 +398,6 @@
                                 </div>
                             </div>
                     
-                            <!-- حالة الفشل -->
                             <div *ngIf="!generatedReport.success" class="report-error">
                                 <div class="error-icon">
                                     <i class="fas fa-exclamation-triangle"></i>
@@ -453,6 +448,8 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                
 
                                 <button class="btn btn-sm btn-outline-secondary btn-toggle-reports"
                                     (click)="togglePreviousReports()">

@@ -953,7 +953,6 @@
 }
 
 
-/* تنسيقات الـ Dropdown */
 .dropdown-search-container {
     position: relative;
     width: 100%;
@@ -1000,14 +999,12 @@
     z-index: 1000;
     margin-top: 0.25rem;
     display: none;
-    /* مخفي افتراضيًا */
     max-height: 350px;
     overflow: hidden;
 }
 
 .dropdown-search-menu.show {
     display: block;
-    /* يظهر فقط عندما يكون active */
 }
 
 .dropdown-search-header {
@@ -1094,7 +1091,6 @@
     font-size: 0.875rem;
 }
 
-/* تنسيق النص المحدد */
 .selected-items-text {
     flex: 1;
     text-align: right;
@@ -1104,7 +1100,6 @@
     white-space: nowrap;
 }
 
-/* أيقونة السهم */
 .dropdown-search-toggle .fa-chevron-down {
     transition: transform 0.3s ease;
     color: #6c757d;
@@ -1114,13 +1109,11 @@
     transform: rotate(180deg);
 }
 
-/* حالة الـ dropdown المفتوح */
 .dropdown-search-container:focus-within .dropdown-search-toggle {
     border-color: #007bff;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
-/* تحسين التخطيط للشاشات الصغيرة */
 @media (max-width: 768px) {
     .dropdown-search-menu {
         position: fixed;
@@ -1138,12 +1131,10 @@
     }
 }
 
-/* منع التمرير عند فتح الـ dropdown */
 body.dropdown-open {
     overflow: hidden;
 }
 
-/* تنسيقات إضافية للفلاتر */
 .simple-filters-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -1163,7 +1154,6 @@ body.dropdown-open {
     margin-bottom: 0.25rem;
 }
 
-/* حالة التعطيل */
 .dropdown-search-toggle:disabled {
     background-color: #e9ecef;
     cursor: not-allowed;
@@ -1175,3 +1165,128 @@ body.dropdown-open {
 }
 
 
+.date-range-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.date-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.date-label {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: center;
+}
+
+.date-input {
+    width: 130px;
+    font-size: 12px;
+}
+
+.btn-clear-date {
+    align-self: flex-end;
+    margin-bottom: 4px;
+    padding: 4px 8px;
+}
+
+@media (max-width: 768px) {
+    .filter-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .date-range-inputs {
+        flex-wrap: wrap;
+    }
+
+    .date-input {
+        width: 120px;
+    }
+}
+
+.form-control.date-input {
+    direction: ltr;
+    text-align: center;
+}
+
+.form-control.date-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+}
+
+.filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.date-range-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.date-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.date-label {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: center;
+}
+
+.date-input {
+    width: 130px;
+    font-size: 12px;
+}
+
+.btn-clear-date {
+    align-self: flex-end;
+    margin-bottom: 4px;
+    padding: 4px 8px;
+}
+
+@media (max-width: 768px) {
+    .filter-actions {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .date-range-inputs {
+        flex-wrap: wrap;
+    }
+
+    .date-input {
+        width: 120px;
+    }
+}
+
+.form-control.date-input {
+    direction: ltr;
+    text-align: center;
+}
+
+.form-control.date-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+}
