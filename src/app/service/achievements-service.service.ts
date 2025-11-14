@@ -17,6 +17,8 @@ export interface PDFFile {
   reportType?: string;
   criteria?: string;
   period?: string;
+  originalName?: string;
+  filters?: any;
 }
 
 export interface ReportFilters {
@@ -694,6 +696,22 @@ export class ActivityService {
       .pipe(
         catchError((error) => {
           console.error('Get User Stats Error:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  deletereportfiles(
+    id: string
+  ): Observable<{ success: boolean; message: string }> {
+    return this.http
+      .delete<{ success: boolean; message: string }>(
+        `${this.API_BASE_URL}/delete-activity/${id}`,
+        { headers: this.getAuthHeaders() }
+      )
+      .pipe(
+        catchError((error) => {
+          console.error('Delete Report File Error:', error);
           return throwError(() => error);
         })
       );

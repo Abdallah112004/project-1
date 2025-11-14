@@ -69,21 +69,6 @@
             </div>
           </div>
         </div>
-
-        <div class="row mt-3" *ngIf="userStats.draftActivities > 0">
-          <div class="col-12">
-            <div class="stat-card draft">
-              <div class="card-icon">
-                <i class="fas fa-edit"></i>
-              </div>
-              <div class="card-content">
-                <h6 class="stat-label">المسودات</h6>
-                <h3 class="stat-value">{{ userStats.draftActivities }}</h3>
-                <small class="stat-subtext">انجازات غير مكتملة</small>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div class="recent-achievements-section">
@@ -141,9 +126,6 @@
 
                       <div class="achievement-header">
                         <div class="achievement-type-badge">
-                          <span class="type-badge" [class]="getAchievementTypeClass(achievement)">
-                            {{ getAchievementType(achievement) }}
-                          </span>
                         </div>
                         <div class="achievement-meta-info">
                           <span class="achievement-date">

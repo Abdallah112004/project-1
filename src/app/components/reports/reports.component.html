@@ -31,35 +31,191 @@
                         </div>
 
                         <div class="card-body" *ngIf="showFilters">
-                            <div class="report-type-section">
+                            <!-- الفلاتر الإضافية مع Dropdown وبحث -->
+                            <div class="filters-section optional-section">
                                 <h6 class="section-title">
-                                    <i class="fas fa-file-alt text-primary"></i>
-                                    نوع التقرير
-                                    <span class="required-badge">إجباري</span>
+                                    <i class="fas fa-filter text-muted"></i>
+                                    فلاتر إضافية
+                                    <span class="optional-badge">اختياري</span>
+                                    <button type="button" class="btn btn-sm btn-clear-filters"
+                                        (click)="clearAllFilters()">
+                                        <i class="fas fa-times"></i>
+                                        مسح الكل
+                                    </button>
                                 </h6>
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="form-group">
-                                            <label class="form-label required">
-                                                اختر نوع التقرير
-                                                <span class="required-star">*</span>
-                                            </label>
-                                            <div class="report-type-options">
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" id="pdfType"
-                                                        [(ngModel)]="reportType" value="pdf" name="reportType" checked>
-                                                    <label class="form-check-label" for="pdfType">
-                                                        <i class="fas fa-file-pdf text-danger"></i>
-                                                        تقرير PDF
-                                                    </label>
+
+                                <div class="simple-filters-grid">
+                                    <!-- فلتر المستخدمين -->
+                                    <div class="simple-filter-group">
+                                        <label class="simple-filter-label">
+                                            المستخدمين
+                                        </label>
+                                        <div class="dropdown-search-container">
+                                            <button class="dropdown-search-toggle" type="button"
+                                                (click)="toggleDropdown('users')" [class.active]="dropdownStates.users">
+                                                <span class="selected-items-text">
+                                                    {{ getSelectedItemsText('users') }}
+                                                </span>
+                                                <i class="fas fa-chevron-down"
+                                                    [class.rotate]="dropdownStates.users"></i>
+                                            </button>
+
+                                            <div class="dropdown-search-menu" [class.show]="dropdownStates.users">
+                                                <div class="dropdown-search-header">
+                                                    <div class="search-input-container">
+                                                        <i class="fas fa-search"></i>
+                                                        <input type="text" class="form-control search-input"
+                                                            placeholder="ابحث في المستخدمين..."
+                                                            [(ngModel)]="searchTerms.users"
+                                                            (input)="filterOptions('users')">
+                                                    </div>
                                                 </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" id="docxType"
-                                                        [(ngModel)]="reportType" value="docx" name="reportType">
-                                                    <label class="form-check-label" for="docxType">
-                                                        <i class="fas fa-file-word text-primary"></i>
-                                                        تقرير DOCX
-                                                    </label>
+
+                                                <div class="dropdown-search-options">
+                                                    <div class="option-item" *ngFor="let user of filteredUserOptions">
+                                                        <label class="option-checkbox">
+                                                            <input type="checkbox" [checked]="user.selected"
+                                                                (change)="toggleOption('users', user)">
+                                                            <span class="checkmark"></span>
+                                                            <span class="option-label">{{ user.label }}</span>
+                                                        </label>
+                                                    </div>
+
+                                                    <div class="no-results" *ngIf="filteredUserOptions.length === 0">
+                                                        <i class="fas fa-search"></i>
+                                                        لا توجد نتائج
+                                                    </div>
+                                                </div>
+
+                                                <div class="dropdown-search-actions">
+                                                    <button type="button" class="btn btn-sm btn-select-all"
+                                                        (click)="selectAll('users')">
+                                                        تحديد الكل
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-clear"
+                                                        (click)="clearSelection('users')">
+                                                        إلغاء الكل
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- فلتر المعايير الرئيسية -->
+                                    <div class="simple-filter-group">
+                                        <label class="simple-filter-label">
+                                            المعايير الرئيسية
+                                        </label>
+                                        <div class="dropdown-search-container">
+                                            <button class="dropdown-search-toggle" type="button"
+                                                (click)="toggleDropdown('mainCriteria')"
+                                                [class.active]="dropdownStates.mainCriteria">
+                                                <span class="selected-items-text">
+                                                    {{ getSelectedItemsText('mainCriteria') }}
+                                                </span>
+                                                <i class="fas fa-chevron-down"
+                                                    [class.rotate]="dropdownStates.mainCriteria"></i>
+                                            </button>
+
+                                            <div class="dropdown-search-menu"
+                                                [class.show]="dropdownStates.mainCriteria">
+                                                <div class="dropdown-search-header">
+                                                    <div class="search-input-container">
+                                                        <i class="fas fa-search"></i>
+                                                        <input type="text" class="form-control search-input"
+                                                            placeholder="ابحث في المعايير الرئيسية..."
+                                                            [(ngModel)]="searchTerms.mainCriteria"
+                                                            (input)="filterOptions('mainCriteria')">
+                                                    </div>
+                                                </div>
+
+                                                <div class="dropdown-search-options">
+                                                    <div class="option-item"
+                                                        *ngFor="let criteria of filteredMainCriteriaOptions">
+                                                        <label class="option-checkbox">
+                                                            <input type="checkbox" [checked]="criteria.selected"
+                                                                (change)="toggleOption('mainCriteria', criteria)">
+                                                            <span class="checkmark"></span>
+                                                            <span class="option-label">{{ criteria.label }}</span>
+                                                        </label>
+                                                    </div>
+
+                                                    <div class="no-results"
+                                                        *ngIf="filteredMainCriteriaOptions.length === 0">
+                                                        <i class="fas fa-search"></i>
+                                                        لا توجد نتائج
+                                                    </div>
+                                                </div>
+
+                                                <div class="dropdown-search-actions">
+                                                    <button type="button" class="btn btn-sm btn-select-all"
+                                                        (click)="selectAll('mainCriteria')">
+                                                        تحديد الكل
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-clear"
+                                                        (click)="clearSelection('mainCriteria')">
+                                                        إلغاء الكل
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- فلتر المعايير الفرعية -->
+                                    <div class="simple-filter-group">
+                                        <label class="simple-filter-label">
+                                            المعايير الفرعية
+                                        </label>
+                                        <div class="dropdown-search-container">
+                                            <button class="dropdown-search-toggle" type="button"
+                                                (click)="toggleDropdown('subCriteria')"
+                                                [disabled]="subCriteriaOptions.length === 0"
+                                                [class.active]="dropdownStates.subCriteria">
+                                                <span class="selected-items-text">
+                                                    {{ getSelectedItemsText('subCriteria') }}
+                                                </span>
+                                                <i class="fas fa-chevron-down"
+                                                    [class.rotate]="dropdownStates.subCriteria"></i>
+                                            </button>
+
+                                            <div class="dropdown-search-menu" [class.show]="dropdownStates.subCriteria">
+                                                <div class="dropdown-search-header">
+                                                    <div class="search-input-container">
+                                                        <i class="fas fa-search"></i>
+                                                        <input type="text" class="form-control search-input"
+                                                            placeholder="ابحث في المعايير الفرعية..."
+                                                            [(ngModel)]="searchTerms.subCriteria"
+                                                            (input)="filterOptions('subCriteria')">
+                                                    </div>
+                                                </div>
+
+                                                <div class="dropdown-search-options">
+                                                    <div class="option-item"
+                                                        *ngFor="let sub of filteredSubCriteriaOptions">
+                                                        <label class="option-checkbox">
+                                                            <input type="checkbox" [checked]="sub.selected"
+                                                                (change)="toggleOption('subCriteria', sub)">
+                                                            <span class="checkmark"></span>
+                                                            <span class="option-label">{{ sub.label }}</span>
+                                                        </label>
+                                                    </div>
+
+                                                    <div class="no-results"
+                                                        *ngIf="filteredSubCriteriaOptions.length === 0">
+                                                        <i class="fas fa-search"></i>
+                                                        لا توجد نتائج
+                                                    </div>
+                                                </div>
+
+                                                <div class="dropdown-search-actions">
+                                                    <button type="button" class="btn btn-sm btn-select-all"
+                                                        (click)="selectAll('subCriteria')">
+                                                        تحديد الكل
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-clear"
+                                                        (click)="clearSelection('subCriteria')">
+                                                        إلغاء الكل
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -115,58 +271,36 @@
                                 </div>
                             </div>
 
-                            <div class="filters-section optional-section">
+                            <div class="report-type-section">
                                 <h6 class="section-title">
-                                    <i class="fas fa-filter text-secondary"></i>
-                                    فلاتر إضافية
-                                    <span class="optional-badge">اختياري</span>
+                                    <i class="fas fa-file-alt text-primary"></i>
+                                    نوع التقرير
+                                    <span class="required-badge">إجباري</span>
                                 </h6>
                                 <div class="row">
-                                    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                                    <div class="col-12">
                                         <div class="form-group">
-                                            <label class="form-label">المستخدم</label>
-                                            <div class="input-with-icon">
-                                                <i class="fas fa-user"></i>
-                                                <select class="form-control" [(ngModel)]="filters.user" name="user">
-                                                    <option value="">جميع المستخدمين</option>
-                                                    <option *ngFor="let user of usersList" [value]="user._id">
-                                                        {{ user.fullname }}
-                                                    </option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                                        <div class="form-group">
-                                            <label class="form-label">المعيار الرئيسي</label>
-                                            <div class="input-with-icon">
-                                                <i class="fas fa-list-alt"></i>
-                                                <select class="form-control" [(ngModel)]="filters.MainCriteria"
-                                                    (change)="onMainCriteriaChange()" name="MainCriteria">
-                                                    <option value="">جميع المعايير</option>
-                                                    <option *ngFor="let criteria of mainCriteriaList"
-                                                        [value]="criteria._id">
-                                                        {{ criteria.name }}
-                                                    </option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                                        <div class="form-group">
-                                            <label class="form-label">المعيار الفرعي</label>
-                                            <div class="input-with-icon">
-                                                <i class="fas fa-list"></i>
-                                                <select class="form-control" [(ngModel)]="filters.SubCriteria"
-                                                    name="SubCriteria"
-                                                    [disabled]="!filters.MainCriteria || subCriteriaList.length === 0">
-                                                    <option value="">جميع المعايير الفرعية</option>
-                                                    <option *ngFor="let sub of subCriteriaList" [value]="sub._id">
-                                                        {{ sub.name }}
-                                                    </option>
-                                                </select>
+                                            <label class="form-label required">
+                                                اختر نوع التقرير
+                                                <span class="required-star">*</span>
+                                            </label>
+                                            <div class="report-type-options">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" id="pdfType"
+                                                        [(ngModel)]="reportType" value="pdf" name="reportType" checked>
+                                                    <label class="form-check-label" for="pdfType">
+                                                        <i class="fas fa-file-pdf text-danger"></i>
+                                                        تقرير PDF
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" id="docxType"
+                                                        [(ngModel)]="reportType" value="docx" name="reportType">
+                                                    <label class="form-check-label" for="docxType">
+                                                        <i class="fas fa-file-word text-primary"></i>
+                                                        تقرير DOCX
+                                                    </label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -193,8 +327,7 @@
                                                 [class.fa-file-word]="!isLoading && reportType === 'docx'"
                                                 [class.fa-spinner]="isLoading" [class.fa-spin]="isLoading"></i>
                                             <span class="btn-text">
-                                                {{ isLoading ? 'جاري إنشاء التقرير...' : (reportType === 'pdf' ? 'إنشاء تقرير PDF' :
-                                                'إنشاء تقرير DOCX') }}
+                                                {{ isLoading ? 'جاري إنشاء التقرير...' : (reportType === 'pdf' ? 'إنشاء تقرير PDF' :'إنشاء تقرير DOCX') }}
                                             </span>
                                         </span>
                                     </button>
@@ -207,48 +340,49 @@
                         <div class="card-header">
                             <h5><i class="fas fa-clipboard-check"></i> نتائج التقرير</h5>
                             <div class="card-actions">
-                                <button class="btn btn-sm btn-outline-secondary btn-toggle-results"
-                                    (click)="toggleReportResults()">
+                                <button class="btn btn-sm btn-outline-secondary btn-toggle-results" (click)="toggleReportResults()">
                                     <i class="fas" [class.fa-chevron-up]="showReportResults"
                                         [class.fa-chevron-down]="!showReportResults"></i>
-                                    <span class="btn-text">{{ showReportResults ? 'إخفاء' : 'عرض' }}</span>
+                                    <span class="btn-text">
+                                        {{ showReportResults ? 'إخفاء' : 'عرض' }}
+                                    </span>
                                 </button>
                             </div>
                         </div>
-
+                    
                         <div class="card-body" *ngIf="showReportResults">
+                            <!-- حالة النجاح -->
                             <div *ngIf="generatedReport.success" class="report-success">
                                 <div class="success-icon">
                                     <i class="fas" [class.fa-file-pdf]="generatedReport.fileType === 'pdf'"
                                         [class.fa-file-word]="generatedReport.fileType === 'docx'"></i>
                                 </div>
+                    
                                 <div class="success-content">
                                     <h4>تم إنشاء التقرير بنجاح!</h4>
+                    
                                     <div class="report-summary">
                                         <div class="summary-item">
                                             <span class="summary-label">نوع التقرير:</span>
                                             <span class="summary-value">
-                                                <span class="badge"
-                                                    [class.badge-pdf]="generatedReport.fileType === 'pdf'"
+                                                <span class="badge" [class.badge-pdf]="generatedReport.fileType === 'pdf'"
                                                     [class.badge-docx]="generatedReport.fileType === 'docx'">
                                                     {{ generatedReport.fileType === 'pdf' ? 'PDF' : 'DOCX' }}
                                                 </span>
                                             </span>
                                         </div>
+                    
                                         <div class="summary-item">
                                             <span class="summary-label">ملخص الفلاتر:</span>
                                             <span class="summary-value">{{ getFilterSummary() }}</span>
                                         </div>
-                                        <div class="summary-item">
-                                            <span class="summary-label">تم الإنشاء بواسطة:</span>
-                                            <span class="summary-value">{{ getCurrentUserName() }}</span>
-                                        </div>
+                    
                                         <div class="summary-item">
                                             <span class="summary-label">تاريخ الإنشاء:</span>
                                             <span class="summary-value">{{ formatDate(currentDate) }}</span>
                                         </div>
                                     </div>
-
+                    
                                     <div class="download-section">
                                         <h6>خيارات التحميل:</h6>
                                         <div class="download-options">
@@ -257,7 +391,7 @@
                                                 <i class="fas fa-external-link-alt"></i>
                                                 <span>فتح التقرير</span>
                                             </button>
-
+                    
                                             <button class="btn btn-outline-success"
                                                 (click)="downloadReport(generatedReport.file, generatedReport.fileType)">
                                                 <i class="fas fa-download"></i>
@@ -267,16 +401,20 @@
                                     </div>
                                 </div>
                             </div>
-
+                    
+                            <!-- حالة الفشل -->
                             <div *ngIf="!generatedReport.success" class="report-error">
                                 <div class="error-icon">
                                     <i class="fas fa-exclamation-triangle"></i>
                                 </div>
+                    
                                 <div class="error-content">
                                     <h4>فشل في إنشاء التقرير</h4>
-                                    <p class="error-message">{{ generatedReport.message || 'حدث خطأ غير معروف' }}</p>
-                                    <div class="error-suggestions"
-                                        *ngIf="generatedReport.message?.includes('لا توجد انجازات')">
+                                    <p class="error-message">
+                                        {{ generatedReport.message || 'حدث خطأ غير معروف' }}
+                                    </p>
+                    
+                                    <div class="error-suggestions" *ngIf="generatedReport.message?.includes('لا توجد انجازات')">
                                         <p class="suggestion-title">اقتراحات:</p>
                                         <ul class="suggestion-list">
                                             <li>توسيع نطاق التاريخ</li>
@@ -284,6 +422,7 @@
                                             <li>التحقق من توفر الأنشطة في الفترة المحددة</li>
                                         </ul>
                                     </div>
+                    
                                     <button class="btn btn-secondary mt-2" (click)="generateReport()">
                                         <i class="fas fa-redo"></i>
                                         <span>إعادة المحاولة</span>
@@ -341,9 +480,8 @@
                                         <thead>
                                             <tr>
                                                 <th width="60">#</th>
-                                                <th>المستخدم</th>
+                                                <th>اسم الملف</th>
                                                 <th>نوع التقرير</th>
-                                                <th>تاريخ الإنشاء</th>
                                                 <th width="120">الإجراءات</th>
                                             </tr>
                                         </thead>
@@ -353,10 +491,11 @@
                                                     <span class="report-number">{{ i + 1 }}</span>
                                                 </td>
                                                 <td>
-                                                    <div class="user-info">
-                                                        <i class="fas fa-user-circle"></i>
-                                                        <div class="user-details">
-                                                            <strong>{{ getUserDisplayName(pdf) }}</strong>
+                                                    <div class="file-info">
+                                                        <i class="fas" [class.fa-file-pdf]="getFileType(pdf) === 'pdf'"
+                                                            [class.fa-file-word]="getFileType(pdf) === 'docx'"></i>
+                                                        <div class="file-details">
+                                                            <strong>{{ getFileName(pdf) }}</strong>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -367,17 +506,11 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <div class="date-info">
-                                                        <i class="fas fa-calendar"></i>
-                                                        <span>{{ formatDate(pdf.createdAt) }}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
                                                     <div class="action-buttons">
                                                         <button *ngIf="getFileType(pdf) === 'pdf'"
                                                             class="btn btn-sm btn-success"
                                                             (click)="openReport(pdf.pdfurl, getFileType(pdf))"
-                                                            title="فتح PDF">
+                                                            title="فتح الملف">
                                                             <i class="fas fa-eye"></i>
                                                         </button>
 
@@ -385,6 +518,9 @@
                                                             (click)="downloadReport(pdf.pdfurl, getFileType(pdf))"
                                                             [title]="'تحميل ' + (getFileType(pdf) === 'pdf' ? 'PDF' : 'DOCX')">
                                                             <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger" (click)="confirmDeleteReport(pdf)" title="حذف التقرير">
+                                                            <i class="fas fa-trash"></i>
                                                         </button>
                                                     </div>
                                                 </td>
