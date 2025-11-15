@@ -70,6 +70,9 @@ export class ReportsComponent implements OnInit, OnDestroy {
     { value: 'قيد المراجعة', label: 'قيد المراجعة', selected: false },
   ];
 
+  searchTerm: string = '';
+  searchTimeout: any;
+
   dropdownStates: Record<DropdownType, boolean> = {
     users: false,
     mainCriteria: false,
@@ -107,6 +110,9 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.removeBodyOverflow();
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
   }
 
   isAnyDropdownOpen(): boolean {
@@ -448,14 +454,74 @@ export class ReportsComponent implements OnInit, OnDestroy {
     });
   }
 
+  normalizeNumbers(text: string): string {
+    if (!text) return '';
+
+    const arabicToEnglishMap: { [key: string]: string } = {
+      '٠': '0',
+      '١': '1',
+      '٢': '2',
+      '٣': '3',
+      '٤': '4',
+      '٥': '5',
+      '٦': '6',
+      '٧': '7',
+      '٨': '8',
+      '٩': '9',
+    };
+
+    return text.replace(
+      /[٠١٢٣٤٥٦٧٨٩]/g,
+      (char) => arabicToEnglishMap[char] || char
+    );
+  }
+
   filterPDFs(): void {
-    if (this.fileTypeFilter === 'all') {
-      this.filteredPDFs = this.pdfFiles;
-    } else {
-      this.filteredPDFs = this.pdfFiles.filter(
+    let filtered = this.pdfFiles;
+
+    if (this.fileTypeFilter !== 'all') {
+      filtered = filtered.filter(
         (pdf) => this.getFileType(pdf) === this.fileTypeFilter
       );
     }
+
+    if (this.searchTerm.trim()) {
+      const searchTermLower = this.normalizeNumbers(this.searchTerm)
+        .toLowerCase()
+        .trim();
+
+      filtered = filtered.filter((pdf) => {
+        const fileName = this.normalizeNumbers(
+          this.getFileName(pdf)
+        ).toLowerCase();
+        return fileName.includes(searchTermLower);
+      });
+    }
+
+    this.filteredPDFs = filtered;
+  }
+
+  onSearchChange(): void {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+
+    this.searchTimeout = setTimeout(() => {
+      this.filterPDFs();
+    }, 300);
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.filterPDFs();
+  }
+
+  get searchResultsInfo(): string {
+    if (!this.searchTerm.trim()) {
+      return `عرض ${this.filteredPDFs.length} من أصل ${this.pdfFiles.length} تقرير`;
+    }
+
+    return `عرض ${this.filteredPDFs.length} من أصل ${this.pdfFiles.length} تقرير للبحث: "${this.searchTerm}"`;
   }
 
   getFileType(pdf: PDFFile): 'pdf' | 'docx' {
@@ -834,8 +900,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
       });
     } catch {
       return dateString;
@@ -962,5 +1026,51 @@ export class ReportsComponent implements OnInit, OnDestroy {
       confirmButtonText: 'حسناً',
       confirmButtonColor: '#f39c12',
     });
+  }
+
+  getSelectedItemsCount(filterType: string): number {
+    const options = this.getFilterOptions(filterType);
+    return options.filter((option) => option.selected).length;
+  }
+
+  getFirstSelectedItemsText(filterType: string, count: number): string {
+    const options = this.getFilterOptions(filterType);
+    const selected = options
+      .filter((option) => option.selected)
+      .slice(0, count);
+    return selected.map((option) => option.label).join('، ');
+  }
+
+  private getFilterOptions(filterType: string): any[] {
+    switch (filterType) {
+      case 'users':
+        return this.userOptions;
+      case 'mainCriteria':
+        return this.mainCriteriaOptions;
+      case 'subCriteria':
+        return this.subCriteriaOptions;
+      default:
+        return [];
+    }
+  }
+
+  getSelectedUsers() {
+    return this.userOptions.filter((user) => user.selected);
+  }
+
+  getSelectedMainCriteria() {
+    return this.mainCriteriaOptions.filter((criteria) => criteria.selected);
+  }
+
+  getSelectedSubCriteria() {
+    return this.subCriteriaOptions.filter((sub) => sub.selected);
+  }
+
+  getTotalSelectedItems(): number {
+    return (
+      this.getSelectedItemsCount('users') +
+      this.getSelectedItemsCount('mainCriteria') +
+      this.getSelectedItemsCount('subCriteria')
+    );
   }
 }

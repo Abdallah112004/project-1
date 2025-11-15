@@ -46,7 +46,7 @@
                                 <div class="simple-filters-grid">
                                     <div class="simple-filter-group">
                                         <label class="simple-filter-label">
-                                            المستخدمين
+                                            الجهات
                                         </label>
                                         <div class="dropdown-search-container">
                                             <button class="dropdown-search-toggle" type="button"
@@ -63,7 +63,7 @@
                                                     <div class="search-input-container">
                                                         <i class="fas fa-search"></i>
                                                         <input type="text" class="form-control search-input"
-                                                            placeholder="ابحث في المستخدمين..."
+                                                            placeholder="ابحث في الجهات..."
                                                             [(ngModel)]="searchTerms.users"
                                                             (input)="filterOptions('users')">
                                                     </div>
@@ -336,7 +336,8 @@
                         <div class="card-header">
                             <h5><i class="fas fa-clipboard-check"></i> نتائج التقرير</h5>
                             <div class="card-actions">
-                                <button class="btn btn-sm btn-outline-secondary btn-toggle-results" (click)="toggleReportResults()">
+                                <button class="btn btn-sm btn-outline-secondary btn-toggle-results"
+                                    (click)="toggleReportResults()">
                                     <i class="fas" [class.fa-chevron-up]="showReportResults"
                                         [class.fa-chevron-down]="!showReportResults"></i>
                                     <span class="btn-text">
@@ -345,40 +346,117 @@
                                 </button>
                             </div>
                         </div>
-                    
+
                         <div class="card-body" *ngIf="showReportResults">
                             <div *ngIf="generatedReport.success" class="report-success">
                                 <div class="success-icon">
                                     <i class="fas" [class.fa-file-pdf]="generatedReport.fileType === 'pdf'"
                                         [class.fa-file-word]="generatedReport.fileType === 'docx'"></i>
                                 </div>
-                    
+
                                 <div class="success-content">
                                     <h4>تم إنشاء التقرير بنجاح!</h4>
-                    
+
                                     <div class="report-summary">
                                         <div class="summary-item">
                                             <span class="summary-label">نوع التقرير:</span>
                                             <span class="summary-value">
-                                                <span class="badge" [class.badge-pdf]="generatedReport.fileType === 'pdf'"
+                                                <span class="badge"
+                                                    [class.badge-pdf]="generatedReport.fileType === 'pdf'"
                                                     [class.badge-docx]="generatedReport.fileType === 'docx'">
                                                     {{ generatedReport.fileType === 'pdf' ? 'PDF' : 'DOCX' }}
                                                 </span>
                                             </span>
                                         </div>
-                    
-                                        <div class="summary-item">
-                                            <span class="summary-label">ملخص الفلاتر:</span>
-                                            <span class="summary-value">{{ getFilterSummary() }}</span>
-                                        </div>
-                    
-                    
+
                                         <div class="summary-item">
                                             <span class="summary-label">تاريخ الإنشاء:</span>
                                             <span class="summary-value">{{ formatDate(currentDate) }}</span>
                                         </div>
+
+                                        <div class="summary-item">
+                                            <span class="summary-label">ملخص الفلاتر:</span>
+                                            <div class="detailed-filter-summary">
+                                                <div class="filter-section">
+                                                    <span class="filter-section-title">
+                                                        <i class="fas fa-calendar-alt"></i>
+                                                        نطاق التاريخ:
+                                                    </span>
+                                                    <span class="filter-section-content">
+                                                        {{ formatDate(filters.startDate) || 'غير محدد' }}
+                                                        <i class="fas fa-arrow-left mx-2"></i>
+                                                        {{ formatDate(filters.endDate) || 'غير محدد' }}
+                                                    </span>
+                                                </div>
+
+                                                <div class="filter-section" *ngIf="getSelectedItemsCount('users') > 0">
+                                                    <div class="filter-section-header">
+                                                        <span class="filter-section-title">
+                                                            <i class="fas fa-users"></i>
+                                                            الجهات:
+                                                        </span>
+                                                        <span class="filter-counter">
+                                                            <span class="counter-number">{{
+                                                                getSelectedItemsCount('users') }}</span>
+                                                            عنصر
+                                                        </span>
+                                                    </div>
+                                                    <div class="filter-items-list">
+                                                        <span class="filter-item"
+                                                            *ngFor="let user of getSelectedUsers(); let i = index">
+                                                            <span class="item-number">{{ i + 1 }}</span>
+                                                            {{ user.label }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="filter-section"
+                                                    *ngIf="getSelectedItemsCount('mainCriteria') > 0">
+                                                    <div class="filter-section-header">
+                                                        <span class="filter-section-title">
+                                                            <i class="fas fa-list-alt"></i>
+                                                            المعايير الرئيسية:
+                                                        </span>
+                                                        <span class="filter-counter">
+                                                            <span class="counter-number">{{
+                                                                getSelectedItemsCount('mainCriteria') }}</span>
+                                                            عنصر
+                                                        </span>
+                                                    </div>
+                                                    <div class="filter-items-list">
+                                                        <span class="filter-item"
+                                                            *ngFor="let criteria of getSelectedMainCriteria(); let i = index">
+                                                            <span class="item-number">{{ i + 1 }}</span>
+                                                            {{ criteria.label }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="filter-section"
+                                                    *ngIf="getSelectedItemsCount('subCriteria') > 0">
+                                                    <div class="filter-section-header">
+                                                        <span class="filter-section-title">
+                                                            <i class="fas fa-list-ul"></i>
+                                                            المعايير الفرعية:
+                                                        </span>
+                                                        <span class="filter-counter">
+                                                            <span class="counter-number">{{
+                                                                getSelectedItemsCount('subCriteria') }}</span>
+                                                            عنصر
+                                                        </span>
+                                                    </div>
+                                                    <div class="filter-items-list">
+                                                        <span class="filter-item"
+                                                            *ngFor="let sub of getSelectedSubCriteria(); let i = index">
+                                                            <span class="item-number">{{ i + 1 }}</span>
+                                                            {{ sub.label }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                    
+
                                     <div class="download-section">
                                         <h6>خيارات التحميل:</h6>
                                         <div class="download-options">
@@ -387,7 +465,7 @@
                                                 <i class="fas fa-external-link-alt"></i>
                                                 <span>فتح التقرير</span>
                                             </button>
-                    
+
                                             <button class="btn btn-outline-success"
                                                 (click)="downloadReport(generatedReport.file, generatedReport.fileType)">
                                                 <i class="fas fa-download"></i>
@@ -397,19 +475,20 @@
                                     </div>
                                 </div>
                             </div>
-                    
+
                             <div *ngIf="!generatedReport.success" class="report-error">
                                 <div class="error-icon">
                                     <i class="fas fa-exclamation-triangle"></i>
                                 </div>
-                    
+
                                 <div class="error-content">
                                     <h4>فشل في إنشاء التقرير</h4>
                                     <p class="error-message">
                                         {{ generatedReport.message || 'حدث خطأ غير معروف' }}
                                     </p>
-                    
-                                    <div class="error-suggestions" *ngIf="generatedReport.message?.includes('لا توجد انجازات')">
+
+                                    <div class="error-suggestions"
+                                        *ngIf="generatedReport.message?.includes('لا توجد انجازات')">
                                         <p class="suggestion-title">اقتراحات:</p>
                                         <ul class="suggestion-list">
                                             <li>توسيع نطاق التاريخ</li>
@@ -417,7 +496,7 @@
                                             <li>التحقق من توفر الأنشطة في الفترة المحددة</li>
                                         </ul>
                                     </div>
-                    
+
                                     <button class="btn btn-secondary mt-2" (click)="generateReport()">
                                         <i class="fas fa-redo"></i>
                                         <span>إعادة المحاولة</span>
@@ -432,6 +511,21 @@
                             <h5><i class="fas fa-history"></i> التقارير السابقة</h5>
                             <div class="card-actions">
                                 <div class="filter-actions">
+
+                                    <!-- في قسم التقارير السابقة -->
+                                    <div class="search-reports">
+                                        <div class="search-input-wrapper">
+                                            <i class="fas fa-search search-icon"></i>
+                                            <input type="text" class="form-control form-control-sm search-input"
+                                                placeholder="ابحث في أسماء التقارير ..." [(ngModel)]="searchTerm"
+                                                (input)="onSearchChange()">
+                                            <button *ngIf="searchTerm" class="btn btn-clear-search"
+                                                (click)="clearSearch()" type="button">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     <div class="file-type-filter">
                                         <span class="filter-label">
                                             <i class="fas fa-filter"></i>
@@ -448,8 +542,6 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                
 
                                 <button class="btn btn-sm btn-outline-secondary btn-toggle-reports"
                                     (click)="togglePreviousReports()">
@@ -516,7 +608,8 @@
                                                             [title]="'تحميل ' + (getFileType(pdf) === 'pdf' ? 'PDF' : 'DOCX')">
                                                             <i class="fas fa-download"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-outline-danger" (click)="confirmDeleteReport(pdf)" title="حذف التقرير">
+                                                        <button class="btn btn-sm btn-outline-danger"
+                                                            (click)="confirmDeleteReport(pdf)" title="حذف التقرير">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </div>
