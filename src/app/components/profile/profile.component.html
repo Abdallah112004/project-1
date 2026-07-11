@@ -1,0 +1,403 @@
+<div class="profile-page" dir="rtl">
+    <app-sidebar></app-sidebar>
+
+  <div class="container py-4">
+
+    <!-- رأس الصفحة -->
+    <div class="profile-header d-flex align-items-center justify-content-between mb-4">
+      <div class="d-flex align-items-center gap-3">
+        <h2 class="mb-0">
+          <i class="bi bi-person-circle text-primary me-2"></i>
+          الملف الشخصي
+        </h2>
+        <span class="badge" [ngClass]="user?.status === 'active' ? 'bg-success' : 'bg-danger'">
+          <i class="bi" [ngClass]="user?.status === 'active' ? 'bi-check-circle' : 'bi-x-circle'"></i>
+          {{ user?.status === 'active' ? 'نشط' : 'معطل' }}
+        </span>
+      </div>
+      <div>
+
+      </div>
+    </div>
+
+    <!-- حالة التحميل -->
+    <div *ngIf="isLoading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">جاري التحميل...</span>
+      </div>
+      <p class="mt-2 text-muted">جاري تحميل بيانات المستخدم...</p>
+    </div>
+
+    <!-- محتوى الملف الشخصي -->
+    <div *ngIf="!isLoading && user">
+
+      <!-- بطاقة الملف الشخصي -->
+      <div class="profile-card card shadow-sm">
+        <div class="card-body">
+
+          <!-- عرض الصور (وضع القراءة) -->
+          <div class="profile-images mb-4" *ngIf="!isEditing && hasUserImages(user)">
+            <h6 class="text-muted mb-3">
+              <i class="bi bi-images me-2"></i>
+              المستندات
+            </h6>
+            <div class="d-flex flex-wrap gap-3">
+              <div class="image-thumbnail" *ngIf="getImageUrl(user.nationalIdImage)"
+                   (click)="openImageViewer(user.nationalIdImage, 'صورة البطاقة (الوجه)')"
+                   title="اضغط لعرض الصورة">
+                <img [src]="getImageUrl(user.nationalIdImage)" alt="صورة البطاقة" />
+                <span class="image-label">الوجه</span>
+              </div>
+              <div class="image-thumbnail" *ngIf="getImageUrl(user.nationalIdImageBack)"
+                   (click)="openImageViewer(user.nationalIdImageBack, 'صورة البطاقة (الظهر)')"
+                   title="اضغط لعرض الصورة">
+                <img [src]="getImageUrl(user.nationalIdImageBack)" alt="ظهر البطاقة" />
+                <span class="image-label">الظهر</span>
+              </div>
+              <div class="image-thumbnail" *ngIf="getImageUrl(user.rationCardImage)"
+                   (click)="openImageViewer(user.rationCardImage, 'صورة بطاقة التموين')"
+                   title="اضغط لعرض الصورة">
+                <img [src]="getImageUrl(user.rationCardImage)" alt="بطاقة التموين" />
+                <span class="image-label">التموين</span>
+              </div>
+              <div class="image-thumbnail" *ngIf="getImageUrl(user.additionalImage)"
+                   (click)="openImageViewer(user.additionalImage, 'صورة إضافية')"
+                   title="اضغط لعرض الصورة">
+                <img [src]="getImageUrl(user.additionalImage)" alt="صورة إضافية" />
+                <span class="image-label">إضافية</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- عرض البيانات (وضع القراءة) -->
+          <div *ngIf="!isEditing" class="profile-info">
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label"><i class="bi bi-person-fill text-primary"></i>الاسم الكامل</span>
+                <span class="info-value">{{ user.fullname}}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label"><i class="bi bi-person-badge text-secondary"></i>اسم المستخدم</span>
+                <span class="info-value">{{ user.username}}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label"><i class="bi bi-card-text text-secondary"></i>الرقم القومي</span>
+                <span class="info-value" dir="ltr">{{ user.nationalId}}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label"><i class="bi bi-phone text-secondary"></i>رقم الهاتف</span>
+                <span class="info-value" dir="ltr">{{ user.phone}}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label"><i class="bi bi-card-list text-secondary"></i>بطاقة التموين</span>
+                <span class="info-value" dir="ltr">{{ user.rationCardNumber}}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label"><i class="bi bi-people text-secondary"></i>عدد الأفراد</span>
+                <span class="info-value">{{ user.familyMembers}}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label"><i class="bi bi-bread text-secondary"></i>الأرغفة الشهرية</span>
+                <span class="info-value">{{ user.monthlyBread}}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label"><i class="bi bi-geo-alt text-secondary"></i>العنوان</span>
+                <span class="info-value">{{ user.address}}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label"><i class="bi bi-shop text-secondary"></i>منفذ الصرف</span>
+                <span class="info-value">{{ user.rationOutlet}}</span>
+              </div>
+              <div class="info-item" *ngIf="user.createdAt">
+                <span class="info-label"><i class="bi bi-calendar text-secondary"></i>تاريخ الإنشاء</span>
+                <span class="info-value">{{ user.createdAt | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- نموذج التعديل -->
+          <div *ngIf="isEditing" class="profile-edit">
+            <!-- البيانات الأساسية -->
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">الاسم الكامل <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="editUser.fullname" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">اسم المستخدم</label>
+                <input type="text" class="form-control" [(ngModel)]="editUser.username" disabled />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">رقم الهاتف <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="editUser.phone" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">الرقم القومي</label>
+                <input type="text" class="form-control" [(ngModel)]="editUser.nationalId" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">رقم بطاقة التموين</label>
+                <input type="text" class="form-control" [(ngModel)]="editUser.rationCardNumber" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">عدد الأفراد <span class="text-primary">(يحسب الأرغفة تلقائياً)</span></label>
+                <input type="number" class="form-control" [(ngModel)]="editUser.familyMembers"
+                       (input)="calculateMonthlyBread()" min="1" />
+                <small class="text-muted">عدد الأفراد × 150 = عدد الأرغفة الشهرية</small>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">عدد الأرغفة الشهرية</label>
+                <input type="number" class="form-control" [(ngModel)]="editUser.monthlyBread"
+                       disabled style="background-color: #f0f0f0;" />
+                <small class="text-primary">يتم حسابه تلقائياً</small>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold">العنوان <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="editUser.address" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">منفذ صرف التموين</label>
+                <input type="text" class="form-control" [(ngModel)]="editUser.rationOutlet" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">كلمة المرور الجديدة <span class="text-muted">(اختياري)</span></label>
+                <div class="position-relative">
+                  <input [type]="showPassword ? 'text' : 'password'" class="form-control"
+                         [(ngModel)]="editUser.newPassword" placeholder="اتركه فارغاً للحفاظ على كلمة المرور الحالية" />
+                  <i class="bi password-toggle-icon" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"
+                     (click)="togglePassword()"
+                     style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                  </i>
+                </div>
+                <small class="text-muted">اتركه فارغاً إذا لم ترغب في تغيير كلمة المرور</small>
+              </div>
+            </div>
+
+            <!-- ====== قسم رفع الصور ====== -->
+            <div class="profile-images-edit mt-4 border-top pt-4">
+              <h6 class="text-muted mb-3">
+                <i class="bi bi-images me-2"></i>
+                تعديل الصور والمستندات
+                <span class="badge bg-info ms-2">اختياري</span>
+              </h6>
+
+              <div class="row g-3">
+                <!-- صورة البطاقة (الوجه) -->
+                <div class="col-md-6">
+                  <div class="image-upload-card border rounded p-3 h-100">
+                    <label class="form-label fw-bold">
+                      <i class="bi bi-card-front text-primary me-1"></i>
+                      صورة البطاقة (الوجه)
+                    </label>
+
+                    <!-- الصورة الحالية -->
+                    <div class="current-image-wrapper mb-2" *ngIf="editUser.nationalIdImage">
+                      <div class="d-flex align-items-center gap-2">
+                        <img [src]="editUser.nationalIdImage" alt="البطاقة الوجه"
+                             class="img-thumbnail preview-image" style="max-height: 80px; width: auto;" />
+                        <button type="button" class="btn btn-danger btn-sm"
+                                (click)="removeImage('nationalIdImage')" title="حذف الصورة">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                        <span class="badge bg-success" *ngIf="isNewImage('nationalIdImage')">جديد</span>
+                      </div>
+                    </div>
+
+                    <!-- زر رفع الصورة -->
+                    <div class="upload-btn-wrapper">
+                      <input type="file" class="form-control"
+                             (change)="onFileSelected($event, 'nationalIdImage')"
+                             accept="image/*" />
+                      <small class="text-muted d-block mt-1">
+                        <i class="bi bi-info-circle"></i>
+                        JPG, PNG, GIF, WEBP (حد أقصى 5MB)
+                      </small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- صورة البطاقة (الظهر) -->
+                <div class="col-md-6">
+                  <div class="image-upload-card border rounded p-3 h-100">
+                    <label class="form-label fw-bold">
+                      <i class="bi bi-card-back text-primary me-1"></i>
+                      صورة البطاقة (الظهر)
+                    </label>
+
+                    <div class="current-image-wrapper mb-2" *ngIf="editUser.nationalIdImageBack">
+                      <div class="d-flex align-items-center gap-2">
+                        <img [src]="editUser.nationalIdImageBack" alt="البطاقة الظهر"
+                             class="img-thumbnail preview-image" style="max-height: 80px; width: auto;" />
+                        <button type="button" class="btn btn-danger btn-sm"
+                                (click)="removeImage('nationalIdImageBack')" title="حذف الصورة">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                        <span class="badge bg-success" *ngIf="isNewImage('nationalIdImageBack')">جديد</span>
+                      </div>
+                    </div>
+
+                    <div class="upload-btn-wrapper">
+                      <input type="file" class="form-control"
+                             (change)="onFileSelected($event, 'nationalIdImageBack')"
+                             accept="image/*" />
+                      <small class="text-muted d-block mt-1">
+                        <i class="bi bi-info-circle"></i>
+                        JPG, PNG, GIF, WEBP (حد أقصى 5MB)
+                      </small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- صورة بطاقة التموين -->
+                <div class="col-md-6">
+                  <div class="image-upload-card border rounded p-3 h-100">
+                    <label class="form-label fw-bold">
+                      <i class="bi bi-card-checklist text-success me-1"></i>
+                      صورة بطاقة التموين
+                    </label>
+
+                    <div class="current-image-wrapper mb-2" *ngIf="editUser.rationCardImage">
+                      <div class="d-flex align-items-center gap-2">
+                        <img [src]="editUser.rationCardImage" alt="بطاقة التموين"
+                             class="img-thumbnail preview-image" style="max-height: 80px; width: auto;" />
+                        <button type="button" class="btn btn-danger btn-sm"
+                                (click)="removeImage('rationCardImage')" title="حذف الصورة">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                        <span class="badge bg-success" *ngIf="isNewImage('rationCardImage')">جديد</span>
+                      </div>
+                    </div>
+
+                    <div class="upload-btn-wrapper">
+                      <input type="file" class="form-control"
+                             (change)="onFileSelected($event, 'rationCardImage')"
+                             accept="image/*" />
+                      <small class="text-muted d-block mt-1">
+                        <i class="bi bi-info-circle"></i>
+                        JPG, PNG, GIF, WEBP (حد أقصى 5MB)
+                      </small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- صورة إضافية -->
+                <div class="col-md-6">
+                  <div class="image-upload-card border rounded p-3 h-100">
+                    <label class="form-label fw-bold">
+                      <i class="bi bi-image text-warning me-1"></i>
+                      صورة إضافية
+                    </label>
+
+                    <div class="current-image-wrapper mb-2" *ngIf="editUser.additionalImage">
+                      <div class="d-flex align-items-center gap-2">
+                        <img [src]="editUser.additionalImage" alt="صورة إضافية"
+                             class="img-thumbnail preview-image" style="max-height: 80px; width: auto;" />
+                        <button type="button" class="btn btn-danger btn-sm"
+                                (click)="removeImage('additionalImage')" title="حذف الصورة">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                        <span class="badge bg-success" *ngIf="isNewImage('additionalImage')">جديد</span>
+                      </div>
+                    </div>
+
+                    <div class="upload-btn-wrapper">
+                      <input type="file" class="form-control"
+                             (change)="onFileSelected($event, 'additionalImage')"
+                             accept="image/*" />
+                      <small class="text-muted d-block mt-1">
+                        <i class="bi bi-info-circle"></i>
+                        JPG, PNG, GIF, WEBP (حد أقصى 5MB)
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- عرض الصور المرفوعة حديثاً -->
+              <div class="uploaded-images mt-3" *ngIf="hasNewImages()">
+                <div class="alert alert-success">
+                  <i class="bi bi-check-circle-fill me-2"></i>
+                  <strong>تم رفع {{ getNewImagesCount() }} صورة جديدة</strong>
+                  <span class="d-block small">لا تنسى حفظ التغييرات لتثبيت الصور</span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                  <div *ngFor="let img of getNewImagesList()" class="position-relative">
+                    <img [src]="img.url" alt="صورة مرفوعة"
+                         class="img-thumbnail" style="max-height: 80px; width: auto;" />
+                    <span class="badge bg-success position-absolute top-0 end-0 m-1" style="font-size: 10px;">
+                      جديد
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- ====== نهاية قسم رفع الصور ====== -->
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- أزرار التحكم -->
+    <div class="profile-actions mb-4" *ngIf="!isEditing" dir="ltr">
+      <button class="btn btn-warning" (click)="enableEditing()">
+        <i class="bi bi-pencil"></i> تعديل الملف الشخصي
+      </button>
+    </div>
+
+    <div class="profile-actions mb-4" *ngIf="isEditing" dir="ltr">
+      <button class="btn btn-success" (click)="saveProfile()" [disabled]="uploadingImages">
+        <i class="bi" [ngClass]="uploadingImages ? 'bi-hourglass-split' : 'bi-check2'"></i>
+        {{ uploadingImages ? 'جاري رفع الصور...' : 'حفظ التغييرات' }}
+      </button>
+      <button class="btn btn-secondary" (click)="cancelEditing()" [disabled]="uploadingImages">
+        <i class="bi bi-x"></i> إلغاء
+      </button>
+    </div>
+
+    <!-- حالة عدم وجود بيانات -->
+    <div *ngIf="!isLoading && !user" class="text-center py-5">
+      <i class="bi bi-person-slash fs-1 d-block mb-3 text-muted"></i>
+      <p class="fs-5 text-muted">لا توجد بيانات للمستخدم</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====== مودال عرض الصور ====== -->
+<div *ngIf="showImageViewer" class="modal fade show d-block modal-backdrop-custom image-viewer-modal">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-white">
+          <i class="bi bi-image me-2"></i>
+          {{ imageViewerTitle }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeImageViewer()"></button>
+      </div>
+      <div class="modal-body text-center p-4">
+        <div class="image-viewer-container">
+          <img [src]="imageViewerSrc" [alt]="imageViewerTitle" class="img-fluid viewer-image"
+               [style.transform]="'scale(' + zoomLevel + ')'" />
+        </div>
+        <div class="image-controls mt-3">
+          <button class="btn btn-outline-light btn-sm" (click)="zoomImage('in')" title="تكبير">
+            <i class="bi bi-zoom-in"></i>
+          </button>
+          <button class="btn btn-outline-light btn-sm" (click)="zoomImage('out')" title="تصغير">
+            <i class="bi bi-zoom-out"></i>
+          </button>
+          <button class="btn btn-outline-light btn-sm" (click)="resetZoom()" title="إعادة ضبط">
+            <i class="bi bi-arrows-fullscreen"></i>
+          </button>
+          <button class="btn btn-outline-light btn-sm" (click)="downloadImage()" title="تحميل الصورة">
+            <i class="bi bi-download"></i>
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeImageViewer()">إغلاق</button>
+      </div>
+    </div>
+  </div>
+</div>

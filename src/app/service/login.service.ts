@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, Observable, tap, throwError } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { jwtDecode } from 'jwt-decode';
 import { Router } from '@angular/router';
 import {
@@ -14,11 +14,15 @@ import {
   providedIn: 'root',
 })
 export class LoginService {
+  // ====== المفاتيح المستخدمة في localStorage ======
   private readonly userKey = 'userData';
   private readonly tokenKey = 'token';
   private readonly roleKey = 'userRole';
-  private readonly apiUrl = 'http://localhost:3000/api';
 
+  // ====== رابط الـ API (تم التصحيح) ======
+  private readonly apiUrl = 'http://localhost:3000/api/auth'; // <-- تم التصحيح
+
+  // ====== BehaviorSubjects للمتابعة ======
   private userBehaviorSubject = new BehaviorSubject<User | null>(
     this.getUserFromLocalStorage()
   );
@@ -43,6 +47,16 @@ export class LoginService {
     }
   }
 
+  // ====== دالة للحصول على Headers مع التوكن ======
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.getTokenFromLocalStorage();
+    return new HttpHeaders({
+      'Authorization': `${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
+
+  // ====== التحقق من الصلاحيات ======
   hasPermission(permission: string): boolean {
     const userRole = this.getUserRole();
 
@@ -53,8 +67,9 @@ export class LoginService {
         'view_archive',
         'view_dashboard',
         'access_admin_dashboard',
+        'manage_admins'
       ],
-      user: ['view_dashboard', 'access_user_dashboard'],
+      client: ['view_dashboard', 'access_user_dashboard'],
     };
 
     return permissions[userRole!]?.includes(permission) || false;
@@ -80,30 +95,34 @@ export class LoginService {
     return this.getUserRole() === 'admin';
   }
 
-  isUser(): boolean {
-    return this.getUserRole() === 'user';
+  isClient(): boolean {
+    return this.getUserRole() === 'client';
   }
 
+  // ====== التوجيه بناءً على الدور ======
   redirectBasedOnRole(): void {
     const userRole = this.getUserRole();
 
     if (userRole === 'admin') {
       this.router.navigate(['/dashboard-admin']);
-    } else if (userRole === 'user') {
-      this.router.navigate(['/dashboard-admin']);
+    } else if (userRole === 'client') {
+      this.router.navigate(['/dashboard']);
     } else {
       this.router.navigate(['/']);
     }
   }
 
+  // ====== تسجيل الدخول ======
   login(credentials: LoginCredentials): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${this.apiUrl}/login`, credentials)
       .pipe(
         tap((response: LoginResponse) => {
-          if (response.token) {
+          if (response.success && response.token) {
+            // حفظ التوكن
             localStorage.setItem(this.tokenKey, response.token);
 
+            // حفظ بيانات المستخدم
             if (response.user) {
               this.setUser(response.user);
               localStorage.setItem(this.roleKey, response.user.role);
@@ -111,7 +130,6 @@ export class LoginService {
             }
 
             this.loggedIn.next(true);
-
             this.redirectBasedOnRole();
           }
         }),
@@ -122,6 +140,7 @@ export class LoginService {
       );
   }
 
+  // ====== تسجيل الخروج ======
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
@@ -132,6 +151,7 @@ export class LoginService {
     this.router.navigate(['/login']);
   }
 
+  // ====== الحصول على دور المستخدم ======
   getUserRole(): string | null {
     return this.userRole.value;
   }
@@ -144,6 +164,7 @@ export class LoginService {
     return this.userBehaviorSubject.value;
   }
 
+  // ====== فك تشفير التوكن ======
   decodeToken(): DecodedToken | null {
     const token = this.getTokenFromLocalStorage();
     if (token) {
@@ -158,6 +179,7 @@ export class LoginService {
     return null;
   }
 
+  // ====== جلب المستخدم من localStorage ======
   getUserFromLocalStorage(): User | null {
     const userDataStr = localStorage.getItem(this.userKey);
     if (!userDataStr || userDataStr === 'undefined') return null;
@@ -170,6 +192,7 @@ export class LoginService {
     }
   }
 
+  // ====== حفظ بيانات المستخدم ======
   setUser(user: User): void {
     localStorage.setItem(this.userKey, JSON.stringify(user));
     localStorage.setItem(this.roleKey, user.role);
@@ -178,10 +201,12 @@ export class LoginService {
     this.loggedIn.next(true);
   }
 
+  // ====== جلب التوكن من localStorage ======
   getTokenFromLocalStorage(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
 
+  // ====== التحقق من صلاحية التوكن ======
   isTokenExpired(token: string): boolean {
     try {
       const decoded = jwtDecode<DecodedToken>(token);
@@ -192,5 +217,12 @@ export class LoginService {
     } catch {
       return true;
     }
+  }
+
+  // ====== التحقق من صحة التوكن عند كل طلب ======
+  isAuthenticated(): boolean {
+    const token = this.getTokenFromLocalStorage();
+    if (!token) return false;
+    return !this.isTokenExpired(token);
   }
 }

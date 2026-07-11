@@ -2,248 +2,1090 @@
   <app-sidebar></app-sidebar>
 
   <div class="page-content container my-4">
+
+    <!-- ====== تبويبات التنقل ====== -->
     <ul class="nav nav-tabs mb-4">
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'users'" (click)="activeTab = 'users'" title="عرض الأقسام">
-          الأقسام
+        <a class="nav-link" [class.active]="activeTab === 'users'" (click)="switchTab('users')" title="عرض المستخدمين">
+          <i class="bi bi-people-fill me-1"></i>
+          عملاء التموين
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'sectors'" (click)="activeTab = 'sectors'"
-          title="عرض القطاعات">
-          القطاعات
+        <a class="nav-link" [class.active]="activeTab === 'free-clients'" (click)="switchTab('free-clients')" title="عرض العملاء الأحرار">
+          <i class="bi bi-person-badge me-1"></i>
+          عملاء العيش الحر
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'admins'" (click)="switchTab('admins')" title="عرض المديرين">
+          <i class="bi bi-shield-lock me-1"></i>
+          المديرين
         </a>
       </li>
     </ul>
 
+    <!-- ====== تبويب المستخدمين ====== -->
     <div *ngIf="activeTab === 'users'">
+      <!-- رأس المستخدمين -->
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
         <div class="mb-2 mb-md-0">
-          <h2 class="mb-1">إدارة الأقسام (إجمالي: {{ filteredList.length }})</h2>
-          <p class="text-muted">إضافة وتعديل الأقسام المرتبطة بالمستخدمين</p>
+          <h2 class="mb-1">
+            <i class="bi bi-people-fill text-primary me-2"></i>
+            إدارة عملاء التموين
+          </h2>
         </div>
-        <button class="btn btn-secondary" (click)="openAddDepartment()" title="إضافة قسم جديد">
-          <i class="bi bi-plus-lg ms-1"></i> إضافة جهه
-        </button>
-      </div>
-
-      <div class="row mb-4 g-2">
-        <div class="col-md-4">
-          <label for="filterSector" class="visually-hidden">اختر القطاع</label>
-          <select id="filterSector" class="form-select dropdown-rtl" [(ngModel)]="selectedSector"
-            (change)="applyFilters()" title="اختر القطاع">
-            <option value="">كل القطاعات</option>
-            <option *ngFor="let s of sectors" [value]="s._id">{{ s.sector }}</option>
-          </select>
-        </div>
-        <div class="col-md-4">
-          <label for="searchDept" class="visually-hidden">بحث باسم الجهه</label>
-          <input id="searchDept" type="text" class="form-control" [(ngModel)]="searchTerm" (input)="applyFilters()"
-            placeholder="ابحث باسم الجهه ..." title="بحث باسم الجهه" />
-        </div>
-        <div class="col-md-4 d-grid">
-          <button class="btn btn-outline-secondary" (click)="resetFilters()" title="إعادة تعيين الفلاتر">
-            <i class="bi bi-arrow-counterclockwise"></i> إعادة تعيين
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary" (click)="openAddUser()" title="إضافة عميل تموين">
+            <i class="bi bi-person-plus me-1"></i> إضافة عميل تموين
           </button>
         </div>
       </div>
 
-      <div class="table-responsive shadow-sm rounded">
-        <table class="table table-hover align-middle text-center mb-0">
-          <thead class="table-light">
-            <tr>
-              <th class="text-end">القطاع</th>
-              <th class="text-end">اسم المستخدم</th>
-              <th class="text-end">الجهه</th>
-              <th>الحالة</th>
-              <th>الإجراءات</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let user of filteredList">
-              <td class="text-end">{{ user.sectorName || '---' }}</td>
-              <td class="text-end">{{ user.username || '---' }}</td>
-              <td class="text-end">{{ user.fullname || '---' }}</td>
-              <td>
-                <span class="badge px-3 py-2" [ngClass]="user.status === 'active' ? 'bg-success' : 'bg-danger'">
-                  {{ user.status === 'active' ? 'نشط' : 'معطل' }}
-                </span>
-              </td>
-              <td class="d-flex justify-content-center gap-1">
-                <button class="btn btn-sm btn-warning" (click)="openEditUser(user)" title="تعديل المستخدم">
-                  <i class="bi bi-pencil"></i>
+      <!-- بطاقات إحصائيات المستخدمين (العملاء فقط) -->
+      <div class="row mb-4 g-3">
+        <div class="col-md-4 col-sm-6">
+          <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="number">{{ clientStats.total || 0 }}</div>
+                <div class="label">إجمالي العملاء</div>
+              </div>
+              <div class="icon text-primary">
+                <i class="bi bi-people"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <div class="stats-card" style="border-right-color: #27ae60;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="number">{{ clientStats.active || 0 }}</div>
+                <div class="label text-success">نشط</div>
+              </div>
+              <div class="icon text-success">
+                <i class="bi bi-check-circle"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <div class="stats-card" style="border-right-color: #e74c3c;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="number">{{ clientStats.inactive || 0 }}</div>
+                <div class="label text-danger">معطل</div>
+              </div>
+              <div class="icon text-danger">
+                <i class="bi bi-x-circle"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- البحث والفلترة -->
+      <div class="filters-wrapper">
+        <div class="row g-3">
+          <!-- شريط البحث مع علامة البحث داخله -->
+          <div class="col-12 col-md-4">
+            <div class="search-input-wrapper">
+              <i class="bi bi-search search-icon"></i>
+              <input type="text" class="form-control search-input-with-icon" [(ngModel)]="searchTerm"
+                (input)="applyFilters()" placeholder="ابحث عن بيانات المستخدم ..." />
+              <button class="btn btn-link clear-search-btn" (click)="searchTerm = ''; applyFilters()" *ngIf="searchTerm"
+                type="button">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- فلتر الحالة -->
+          <div class="col-6 col-md-4">
+            <select class="form-select" [(ngModel)]="selectedStatus" (change)="applyFilters()">
+              <option value="">جميع الحالات</option>
+              <option value="active">نشط</option>
+              <option value="inactive">معطل</option>
+            </select>
+          </div>
+
+          <!-- زر إعادة تعيين -->
+          <div class="col-6 col-md-4">
+            <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+              <i class="bi bi-arrow-counterclockwise"></i> إعادة تعيين
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- بطاقات المستخدمين مع عرض الصور -->
+      <div class="row g-3">
+        <div class="col-12 col-md-6 col-lg-4" *ngFor="let user of filteredList; let i = index">
+          <div class="user-card card h-100 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span class="badge bg-primary rounded-pill">#{{ i + 1 }}</span>
+              <span class="badge px-3 py-2" [ngClass]="user.status === 'active' ? 'bg-success' : 'bg-danger'">
+                {{ user.status === 'active' ? 'نشط' : 'معطل' }}
+              </span>
+            </div>
+            <div class="card-body">
+
+              <div class="user-info">
+                <div class="info-row">
+                  <span class="info-label"><i class="bi bi-person-fill text-primary me-1"></i>الاسم:</span>
+                  <span class="info-value fw-bold">{{ user.fullname}}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label"><i class="bi bi-person-badge text-secondary me-1"></i>اسم المستخدم:</span>
+                  <span class="info-value">{{ user.username}}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label"><i class="bi bi-card-text text-secondary me-1"></i>الرقم القومي:</span>
+                  <span class="info-value" dir="ltr">{{ user.nationalId}}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label"><i class="bi bi-phone text-secondary me-1"></i>الهاتف:</span>
+                  <span class="info-value" dir="ltr">{{ user.phone}}</span>
+                </div>
+                <!-- عرض الكمية اليومية -->
+                <div class="info-row" *ngIf="user.dailyBreadQuantity">
+                  <span class="info-label"><i class="bi bi-bread text-warning me-1"></i>الكمية اليومية:</span>
+                  <span class="info-value fw-bold text-primary">{{ user.dailyBreadQuantity }}</span>
+                </div>
+                <div class="info-row" *ngIf="user.rationCardNumber">
+                  <span class="info-label"><i class="bi bi-card-list text-secondary me-1"></i>بطاقة التموين:</span>
+                  <span class="info-value" dir="ltr">{{ user.rationCardNumber }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer bg-transparent border-top-0">
+              <div class="d-flex justify-content-around flex-wrap gap-2">
+                <!-- زر عرض التفاصيل (جديد) -->
+                <button class="btn btn-outline-info btn-sm" (click)="viewProfile(user._id)" title="عرض الملف الشخصي">
+                  <i class="bi bi-person-circle"></i> التفاصيل
                 </button>
-                <button class="btn btn-sm btn-secondary" (click)="toggleStatus(user)" title="تغيير حالة المستخدم">
-                  <i class="bi bi-toggle-on"></i>
+                <button class="btn btn-outline-warning btn-sm" (click)="openEditUser(user)" title="تعديل">
+                  <i class="bi bi-pencil"></i> تعديل
                 </button>
-                <button class="btn btn-sm btn-danger" (click)="deleteUser(user)" title="حذف المستخدم">
-                  <i class="bi bi-trash"></i>
+                <button class="btn btn-outline-secondary btn-sm" (click)="toggleStatus(user)"
+                  [title]="user.status === 'active' ? 'تعطيل' : 'تفعيل'">
+                  <i class="bi" [ngClass]="user.status === 'active' ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
+                  {{ user.status === 'active' ? 'تعطيل' : 'تفعيل' }}
                 </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div *ngIf="filteredList.length === 0" class="text-center py-3 text-muted">لا يوجد أقسام لعرضها</div>
+                <button class="btn btn-outline-danger btn-sm" (click)="deleteUser(user)" title="حذف">
+                  <i class="bi bi-trash"></i> حذف
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="filteredList.length === 0" class="col-12 text-center py-5 text-muted">
+          <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+          <p class="fs-5">لا يوجد مستخدمين لعرضهم</p>
+        </div>
       </div>
     </div>
 
-    <div *ngIf="activeTab === 'sectors'">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">إدارة القطاعات (إجمالي: {{ sectors.length }})</h2>
-        <button class="btn btn-secondary" (click)="openSectorForm()" title="إضافة قطاع جديد">
-          <i class="bi bi-diagram-3 ms-1"></i> إضافة قطاع
+    <!-- ====== تبويب المديرين ====== -->
+    <div *ngIf="activeTab === 'admins'">
+      <!-- رأس المديرين -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div class="mb-2 mb-md-0">
+          <h2 class="mb-1">
+            <i class="bi bi-people-fill text-primary me-2"></i>
+            إدارة المديرين
+          </h2>
+        </div>
+        <button class="btn btn-primary" (click)="openAddAdmin()" title="إضافة مدير جديد">
+          <i class="bi bi-person-plus me-1"></i> إضافة مدير جديد
         </button>
       </div>
 
-      <div class="table-responsive shadow-sm rounded">
-        <table class="table table-hover text-center align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>اسم القطاع</th>
-              <th>الإجراءات</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let s of sectors">
-              <td>{{ s.sector }}</td>
-              <td class="d-flex justify-content-center gap-2">
-                <button class="btn btn-sm btn-warning" (click)="editSector(s)" title="تعديل القطاع">
-                  <i class="bi bi-pencil"></i>
+      <!-- بطاقات إحصائيات المديرين -->
+      <div class="row mb-4 g-3">
+        <div class="col-md-4 col-sm-6">
+          <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="number">{{ adminsList.length }}</div>
+                <div class="label">إجمالي المديرين</div>
+              </div>
+              <div class="icon text-primary">
+                <i class="bi bi-people"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <div class="stats-card" style="border-right-color: #27ae60;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="number">{{ getActiveAdminsCount() }}</div>
+                <div class="label text-success">نشط</div>
+              </div>
+              <div class="icon text-success">
+                <i class="bi bi-check-circle"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <div class="stats-card" style="border-right-color: #e74c3c;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="number">{{ getInactiveAdminsCount() }}</div>
+                <div class="label text-danger">معطل</div>
+              </div>
+              <div class="icon text-danger">
+                <i class="bi bi-x-circle"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- بحث وفلترة المديرين -->
+      <div class="filters-wrapper">
+        <div class="row g-3">
+          <!-- شريط البحث مع علامة البحث داخله -->
+          <div class="col-12 col-md-4">
+            <div class="search-input-wrapper">
+              <i class="bi bi-search search-icon"></i>
+              <input type="text" class="form-control search-input-with-icon" [(ngModel)]="adminSearchTerm"
+                (input)="filterAdmins()" placeholder="ابحث باسم المدير أو اسم المستخدم ..." />
+              <button class="btn btn-link clear-search-btn" (click)="adminSearchTerm = ''; filterAdmins()"
+                *ngIf="adminSearchTerm" type="button">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- فلتر الحالة -->
+          <div class="col-6 col-md-4">
+            <select class="form-select" [(ngModel)]="adminStatusFilter" (change)="filterAdmins()">
+              <option value="">جميع الحالات</option>
+              <option value="active">نشط</option>
+              <option value="inactive">معطل</option>
+            </select>
+          </div>
+
+          <!-- زر إعادة تعيين -->
+          <div class="col-6 col-md-4">
+            <button class="btn btn-outline-secondary w-100" (click)="resetAdminFilters()">
+              <i class="bi bi-arrow-counterclockwise"></i> إعادة تعيين
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- بطاقات المديرين بدلاً من الجدول -->
+      <div class="row g-3">
+        <div class="col-12 col-md-6 col-lg-4" *ngFor="let admin of filteredAdminsList; let i = index">
+          <div class="user-card card h-100 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span class="badge bg-primary rounded-pill">#{{ i + 1 }}</span>
+              <span class="badge px-3 py-2" [ngClass]="admin.status === 'active' ? 'bg-success' : 'bg-danger'">
+                <i class="bi" [ngClass]="admin.status === 'active' ? 'bi-check-circle' : 'bi-x-circle'"></i>
+                {{ admin.status === 'active' ? 'نشط' : 'معطل' }}
+              </span>
+            </div>
+            <div class="card-body">
+              <div class="user-info">
+                <div class="info-row">
+                  <span class="info-label"><i class="bi bi-person-fill text-primary me-1"></i>الاسم:</span>
+                  <span class="info-value fw-bold">{{ admin.fullname}}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label"><i class="bi bi-person-badge text-secondary me-1"></i>اسم المستخدم:</span>
+                  <span class="info-value">{{ admin.username}}</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer bg-transparent border-top-0">
+              <div class="d-flex justify-content-around">
+                <button class="btn btn-outline-primary btn-sm" (click)="openEditAdmin(admin)" title="تعديل">
+                  <i class="bi bi-pencil"></i> تعديل
                 </button>
-                <button class="btn btn-sm btn-danger" (click)="deleteSector(s._id)" title="حذف القطاع">
-                  <i class="bi bi-trash"></i>
+                <button class="btn btn-outline-secondary btn-sm" (click)="toggleAdminStatus(admin)"
+                  [title]="admin.status === 'active' ? 'تعطيل' : 'تفعيل'">
+                  <i class="bi" [ngClass]="admin.status === 'active' ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
+                  {{ admin.status === 'active' ? 'تعطيل' : 'تفعيل' }}
                 </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div *ngIf="sectors.length === 0" class="text-center py-3 text-muted">لا يوجد قطاعات لعرضها</div>
+                <button class="btn btn-outline-danger btn-sm" (click)="deleteAdmin(admin)" title="حذف">
+                  <i class="bi bi-trash"></i> حذف
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="filteredAdminsList.length === 0" class="col-12 text-center py-5 text-muted">
+          <i class="bi bi-people fs-1 d-block mb-3"></i>
+          <p class="fs-5">{{ adminSearchTerm || adminStatusFilter ? 'لا يوجد مديرين يطابقون البحث' : 'لا يوجد مديرين مسجلين في النظام' }}</p>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<div *ngIf="showAddDepartmentModal" class="modal fade show d-block modal-backdrop-custom">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">{{ newDepartment._id ? 'تعديل القسم' : 'إضافة جهه جديده' }}</h5>
-        <button type="button" class="btn-close" (click)="closeAddDepartment()" title="إغلاق"></button>
+    <!-- ====== تبويب العملاء الأحرار ====== -->
+    <div *ngIf="activeTab === 'free-clients'">
+      <!-- رأس العملاء الأحرار -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div class="mb-2 mb-md-0">
+          <h2 class="mb-1">
+            <i class="bi bi-person-badge text-success me-2"></i>
+            إدارة عملاء العيش الحر
+          </h2>
+        </div>
+        <button class="btn btn-success" (click)="openAddFreeClient()" title="إضافة عميل حر">
+          <i class="bi bi-person-plus me-1"></i> إضافة عميل حر
+        </button>
       </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label for="deptSector" class="form-label">القطاع:</label>
-          <select id="deptSector" class="form-select dropdown-rtl" [(ngModel)]="newDepartment.sector"
-            title="اختر القطاع">
-            <option value="" disabled selected>اختر اسم القطاع</option>
-            <option *ngFor="let s of sectors" [value]="s._id">{{ s.sector }}</option>
-          </select>
+
+      <!-- بطاقات إحصائيات العملاء الأحرار -->
+      <div class="row mb-4 g-3">
+        <div class="col-md-4 col-sm-6">
+          <div class="stats-card" style="border-right-color: #2ecc71;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="number">{{ freeClientsStats.total || 0 }}</div>
+                <div class="label">إجمالي العملاء الأحرار</div>
+              </div>
+              <div class="icon text-success">
+                <i class="bi bi-person-badge"></i>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="mb-3">
-          <label for="deptUsername" class="form-label">اسم المستخدم:</label>
-          <input id="deptUsername" type="text" class="form-control" [(ngModel)]="newDepartment.username"
-            placeholder="اسم المستخدم" title="اسم المستخدم" />
+        <div class="col-md-4 col-sm-6">
+          <div class="stats-card" style="border-right-color: #27ae60;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="number">{{ freeClientsStats.active || 0 }}</div>
+                <div class="label text-success">نشط</div>
+              </div>
+              <div class="icon text-success">
+                <i class="bi bi-check-circle"></i>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="mb-3">
-          <label for="deptFullname" class="form-label">الاسم الكامل (القسم):</label>
-          <input id="deptFullname" type="text" class="form-control" [(ngModel)]="newDepartment.fullname"
-            placeholder="اسم القسم" title="الاسم الكامل" />
-        </div>
-        <div class="mb-3 position-relative password-input-container">
-          <label for="deptPassword" class="form-label">كلمة المرور:</label>
-          <input id="deptPassword" [type]="showPassword ? 'text' : 'password'" class="form-control password-input"
-            [(ngModel)]="newDepartment.password" placeholder="كلمة المرور" title="كلمة المرور" />
-          <i class="bi password-toggle-icon" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"
-            (click)="togglePassword()" title="إظهار/إخفاء كلمة المرور"></i>
-        </div>
-        <div class="mb-3">
-          <label for="deptRole" class="form-label">الدور:</label>
-          <select id="deptRole" class="form-select dropdown-rtl" [(ngModel)]="newDepartment.role" title="اختر الدور">
-            <option value="user">مستخدم</option>
-            <option value="admin">مشرف</option>
-          </select>
+        <div class="col-md-4 col-sm-6">
+          <div class="stats-card" style="border-right-color: #e74c3c;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="number">{{ freeClientsStats.inactive || 0 }}</div>
+                <div class="label text-danger">معطل</div>
+              </div>
+              <div class="icon text-danger">
+                <i class="bi bi-x-circle"></i>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeAddDepartment()" title="إلغاء">إلغاء</button>
-        <button class="btn btn-primary" (click)="saveDepartment()" title="حفظ">حفظ</button>
+
+      <!-- بحث وفلترة العملاء الأحرار -->
+      <div class="filters-wrapper">
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <div class="search-input-wrapper">
+              <i class="bi bi-search search-icon"></i>
+              <input type="text" class="form-control search-input-with-icon" [(ngModel)]="freeClientSearchTerm"
+                (input)="filterFreeClients()" placeholder="ابحث باسم العميل أو الهاتف ..." />
+              <button class="btn btn-link clear-search-btn" (click)="freeClientSearchTerm = ''; filterFreeClients()"
+                *ngIf="freeClientSearchTerm" type="button">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-6 col-md-4">
+            <select class="form-select" [(ngModel)]="freeClientStatusFilter" (change)="filterFreeClients()">
+              <option value="">جميع الحالات</option>
+              <option value="active">نشط</option>
+              <option value="inactive">معطل</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-4">
+            <button class="btn btn-outline-secondary w-100" (click)="resetFreeClientFilters()">
+              <i class="bi bi-arrow-counterclockwise"></i> إعادة تعيين
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- بطاقات العملاء الأحرار -->
+      <div class="row g-3">
+        <div class="col-12 col-md-6 col-lg-4" *ngFor="let client of filteredFreeClients; let i = index">
+          <div class="user-card card h-100 shadow-sm border-success">
+            <div class="card-header d-flex justify-content-between align-items-center bg-success bg-opacity-10">
+              <span class="badge bg-success rounded-pill">#{{ i + 1 }}</span>
+              <span class="badge px-3 py-2" [ngClass]="client.status === 'active' ? 'bg-success' : 'bg-danger'">
+                {{ client.status === 'active' ? 'نشط' : 'معطل' }}
+              </span>
+            </div>
+            <div class="card-body">
+              <div class="user-info">
+                <div class="info-row">
+                  <span class="info-label"><i class="bi bi-person-fill text-success me-1"></i>الاسم:</span>
+                  <span class="info-value fw-bold">{{ client.fullname }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label"><i class="bi bi-person-badge text-secondary me-1"></i>اسم المستخدم:</span>
+                  <span class="info-value">{{ client.username }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label"><i class="bi bi-phone text-secondary me-1"></i>الهاتف:</span>
+                  <span class="info-value" dir="ltr">{{ client.phone }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label"><i class="bi bi-bread text-warning me-1"></i>الكمية اليومية:</span>
+                  <span class="info-value fw-bold text-primary">{{ client.dailyBreadQuantity || 0 }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label"><i class="bi bi-coin text-info me-1"></i>سعر الرغيف:</span>
+                  <span class="info-value">{{ client.breadPrice || 1 }} جنيه</span>
+                </div>
+                <div class="info-row" *ngIf="client.notes">
+                  <span class="info-label"><i class="bi bi-sticky text-secondary me-1"></i>ملاحظات:</span>
+                  <span class="info-value small">{{ client.notes }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer bg-transparent border-top-0">
+              <div class="d-flex justify-content-around flex-wrap gap-2">
+                <button class="btn btn-outline-info btn-sm" (click)="viewProfile(client._id)" title="عرض الملف الشخصي">
+                  <i class="bi bi-person-circle"></i> التفاصيل
+                </button>
+                <button class="btn btn-outline-warning btn-sm" (click)="openEditFreeClient(client)" title="تعديل">
+                  <i class="bi bi-pencil"></i> تعديل
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" (click)="toggleFreeClientStatus(client)"
+                  [title]="client.status === 'active' ? 'تعطيل' : 'تفعيل'">
+                  <i class="bi" [ngClass]="client.status === 'active' ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
+                  {{ client.status === 'active' ? 'تعطيل' : 'تفعيل' }}
+                </button>
+                <button class="btn btn-outline-danger btn-sm" (click)="deleteFreeClient(client)" title="حذف">
+                  <i class="bi bi-trash"></i> حذف
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="filteredFreeClients.length === 0" class="col-12 text-center py-5 text-muted">
+          <i class="bi bi-person-badge fs-1 d-block mb-3"></i>
+          <p class="fs-5">لا يوجد عملاء أحرار</p>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<div *ngIf="showSectorForm" class="modal fade show d-block modal-backdrop-custom">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">{{ newSector._id ? 'تعديل القطاع' : 'إضافة قطاع جديد' }}</h5>
-        <button type="button" class="btn-close" (click)="closeSectorForm()" title="إغلاق"></button>
-      </div>
-      <div class="modal-body">
-        <label for="sectorName" class="visually-hidden">اسم القطاع</label>
-        <input id="sectorName" type="text" class="form-control" [(ngModel)]="newSector.sector"
-          placeholder="اضف اسم القطاع" title="اسم القطاع" />
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeSectorForm()" title="إلغاء">إلغاء</button>
-        <button class="btn btn-primary" (click)="saveSector()" title="حفظ">حفظ</button>
+    <!-- ====== مودال إضافة عميل حر ====== -->
+    <div *ngIf="showAddFreeClientModal" class="modal fade show d-block modal-backdrop-custom">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title text-white">
+              <i class="bi bi-person-plus text-white me-2"></i>
+              إضافة عميل حر
+            </h5>
+            <button type="button" class="btn-close btn-close-white" (click)="closeAddFreeClient()"></button>
+          </div>
+          <div class="modal-body">
+            <!-- الحقول الإجبارية -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">الاسم الكامل <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="newFreeClient.fullname" placeholder="مثال: أحمد محمد" />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">رقم الهاتف <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="newFreeClient.phone" placeholder="مثال: 01234567890" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">اسم المستخدم <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="newFreeClient.username" placeholder="مثال: ahmed123" />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">كلمة المرور <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                  <input [type]="showFreeClientPassword ? 'text' : 'password'" class="form-control"
+                    [(ngModel)]="newFreeClient.password" placeholder="كلمة المرور (6 أحرف على الأقل)" />
+                  <i class="bi password-toggle-icon" [ngClass]="showFreeClientPassword ? 'bi-eye-slash' : 'bi-eye'"
+                    (click)="showFreeClientPassword = !showFreeClientPassword"
+                    style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                  </i>
+                </div>
+                <small class="text-muted">يجب أن تكون 6 أحرف على الأقل</small>
+              </div>
+            </div>
+
+            <hr class="my-3">
+
+            <!-- بيانات إضافية -->
+            <h6 class="text-muted mb-3">
+              <i class="bi bi-gear me-2"></i>
+              إعدادات العميل الحر
+            </h6>
+
+            <!-- حقل الكمية اليومية -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">
+                  <i class="bi bi-bread text-warning me-1"></i>
+                  الكمية اليومية
+                </label>
+                <input type="number" class="form-control" [(ngModel)]="newFreeClient.dailyBreadQuantity"
+                       placeholder="عدد الأرغفة اليومية" min="0" />
+                <small class="text-muted">الكمية التي سيتم صرفها يومياً</small>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <label class="form-label">العنوان</label>
+                <input type="text" class="form-control" [(ngModel)]="newFreeClient.address" placeholder="العنوان بالتفصيل" />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">ملاحظات</label>
+              <textarea class="form-control" [(ngModel)]="newFreeClient.notes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closeAddFreeClient()">إلغاء</button>
+            <button class="btn btn-success" (click)="saveFreeClient()">
+              <i class="bi bi-check2 me-1"></i> إضافة عميل حر
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<div *ngIf="showEditUserModal" class="modal fade show d-block modal-backdrop-custom">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">تعديل القسم/المستخدم</h5>
-        <button type="button" class="btn-close" (click)="closeEditUser()" title="إغلاق"></button>
+    <!-- ====== مودال تعديل عميل حر ====== -->
+    <div *ngIf="showEditFreeClientModal" class="modal fade show d-block modal-backdrop-custom">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title text-white">
+              <i class="bi bi-pencil-square text-white me-2"></i>
+              تعديل عميل حر
+            </h5>
+            <button type="button" class="btn-close btn-close-white" (click)="closeEditFreeClient()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">الاسم الكامل <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="selectedFreeClient.fullname" />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">رقم الهاتف <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="selectedFreeClient.phone" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">اسم المستخدم</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedFreeClient.username" />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">كلمة المرور الجديدة (اختياري)</label>
+                <div class="position-relative">
+                  <input [type]="showEditFreeClientPassword ? 'text' : 'password'" class="form-control"
+                    [(ngModel)]="selectedFreeClient.newPassword" placeholder="اتركه فارغاً للحفاظ على كلمة المرور الحالية" />
+                  <i class="bi password-toggle-icon" [ngClass]="showEditFreeClientPassword ? 'bi-eye-slash' : 'bi-eye'"
+                    (click)="showEditFreeClientPassword = !showEditFreeClientPassword"
+                    style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                  </i>
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-3">
+
+            <!-- حقل الكمية اليومية في التعديل -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">
+                  <i class="bi bi-bread text-warning me-1"></i>
+                  الكمية اليومية
+                </label>
+                <input type="number" class="form-control" [(ngModel)]="selectedFreeClient.dailyBreadQuantity" min="0" />
+                <small class="text-muted">الكمية التي سيتم صرفها يومياً</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">عدد الأرغفة الشهرية</label>
+                <input type="number" class="form-control" [(ngModel)]="selectedFreeClient.monthlyBread" min="0" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">الحالة</label>
+                <select class="form-select" [(ngModel)]="selectedFreeClient.status">
+                  <option value="active">نشط</option>
+                  <option value="inactive">معطل</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <label class="form-label">العنوان</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedFreeClient.address" />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">ملاحظات</label>
+              <textarea class="form-control" [(ngModel)]="selectedFreeClient.notes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closeEditFreeClient()">إلغاء</button>
+            <button class="btn btn-success" (click)="confirmEditFreeClient()">
+              <i class="bi bi-check2 me-1"></i> حفظ التغييرات
+            </button>
+          </div>
+        </div>
       </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label for="editUserSector" class="form-label">القطاع:</label>
-          <select id="editUserSector" class="form-select dropdown-rtl" [(ngModel)]="selectedUser.sector"
-            title="اختر القطاع">
-            <option *ngFor="let s of sectors" [value]="s._id">{{ s.sector }}</option>
-          </select>
-        </div>
-        <div class="mb-3">
-          <label for="editUsername" class="form-label">اسم المستخدم:</label>
-          <input id="editUsername" type="text" class="form-control" [(ngModel)]="selectedUser.username"
-            placeholder="اسم المستخدم" title="اسم المستخدم" />
-        </div>
-        <div class="mb-3 password-input-container">
-          <label for="editPassword" class="form-label">كلمة المرور الجديدة (اختياري):</label>
-          <input id="editPassword" [type]="showEditPassword ? 'text' : 'password'" class="form-control password-input"
-            [(ngModel)]="selectedUser.newPassword" placeholder="اتركه فارغاً للحفاظ على كلمة المرور الحالية"
-            title="كلمة المرور الجديدة" />
-          <i class="bi password-toggle-icon" [ngClass]="showEditPassword ? 'bi-eye-slash' : 'bi-eye'"
-            (click)="toggleEditPassword()" title="إظهار/إخفاء كلمة المرور"></i>
-        </div>
-        <div class="mb-3">
-          <label for="editFullname" class="form-label">الاسم الكامل (القسم):</label>
-          <input id="editFullname" type="text" class="form-control" [(ngModel)]="selectedUser.fullname"
-            placeholder="اسم القسم" title="الاسم الكامل" />
-        </div>
-        <div class="mb-3">
-          <label for="editRole" class="form-label">الدور:</label>
-          <select id="editRole" class="form-select dropdown-rtl" [(ngModel)]="selectedUser.role" title="اختر الدور">
-            <option value="user">مستخدم</option>
-            <option value="admin">مشرف</option>
-          </select>
-        </div>
-        <div class="mb-3">
-          <label for="editStatus" class="form-label">الحالة:</label>
-          <select id="editStatus" class="form-select dropdown-rtl" [(ngModel)]="selectedUser.status"
-            title="اختر الحالة">
-            <option value="active">نشط</option>
-            <option value="inactive">معطل</option>
-          </select>
+    </div>
+
+    <!-- ====== مودال إضافة مدير جديد ====== -->
+    <div *ngIf="showAddAdminModal" class="modal fade show d-block modal-backdrop-custom">
+      <div class="modal-dialog modal-md">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title text-white">
+              <i class="bi bi-person-plus text-white me-2"></i>
+              إضافة مدير جديد
+            </h5>
+            <button type="button" class="btn-close btn-close-white" (click)="closeAddAdmin()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-bold">الاسم <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="newAdmin.fullname" placeholder="مثال: أحمد محمد" />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">اسم المستخدم <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="newAdmin.username" placeholder="مثال: ahmed123" />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">كلمة المرور <span class="text-danger">*</span></label>
+              <div class="position-relative">
+                <input [type]="showAdminPassword ? 'text' : 'password'" class="form-control"
+                  [(ngModel)]="newAdmin.password" placeholder="كلمة المرور (6 أحرف على الأقل)" />
+                <i class="bi password-toggle-icon" [ngClass]="showAdminPassword ? 'bi-eye-slash' : 'bi-eye'"
+                  (click)="toggleAdminPassword()"
+                  style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                </i>
+              </div>
+              <small class="text-muted">يجب أن تكون 6 أحرف على الأقل</small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closeAddAdmin()">إلغاء</button>
+            <button class="btn btn-primary" (click)="saveAdmin()">
+              <i class="bi bi-check2 me-1"></i> إضافة مدير
+            </button>
+          </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeEditUser()" title="إلغاء">إلغاء</button>
-        <button class="btn btn-primary" (click)="confirmEditUser()" title="حفظ">حفظ</button>
+    </div>
+
+    <!-- ====== مودال إضافة مستخدم جديد (عميل عادي) ====== -->
+    <div *ngIf="showAddDepartmentModal" class="modal fade show d-block modal-backdrop-custom">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title text-white">
+              <i class="bi bi-person-plus text-white me-2"></i>
+              إضافة عميل تموين
+            </h5>
+            <button type="button" class="btn-close btn-close-white" (click)="closeAddDepartment()"></button>
+          </div>
+          <div class="modal-body">
+            <!-- الحقول الإجبارية -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">اسم المستخدم <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="newDepartment.username" placeholder="مثال: ahmed123" />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">كلمة المرور <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                  <input [type]="showPassword ? 'text' : 'password'" class="form-control"
+                    [(ngModel)]="newDepartment.password" placeholder="كلمة المرور" />
+                  <i class="bi password-toggle-icon" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"
+                    (click)="togglePassword()"
+                    style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                  </i>
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-3">
+
+            <!-- البيانات الإضافية (اختيارية) -->
+            <h6 class="text-muted mb-3">
+              <i class="bi bi-arrow-down-circle me-2"></i>
+              بيانات إضافية (يمكن للمستخدم إكمالها لاحقاً)
+            </h6>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">الاسم </label>
+                <input type="text" class="form-control" [(ngModel)]="newDepartment.fullname" placeholder="الاسم " />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">رقم الهاتف</label>
+                <input type="text" class="form-control" [(ngModel)]="newDepartment.phone" placeholder="رقم الهاتف" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">الرقم القومي</label>
+                <input type="text" class="form-control" [(ngModel)]="newDepartment.nationalId" placeholder="الرقم القومي" />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">
+                  <i class="bi bi-bread text-warning me-1"></i>
+                  عدد العيش المطلوب صرفه
+                </label>
+                <input type="number" class="form-control" [(ngModel)]="newDepartment.dailyBreadQuantity"
+                       placeholder="عدد الأرغفة " min="1" />
+                <small class="text-muted">الكمية التي سيتم صرفها يوم بعد يوم </small>
+              </div>
+            </div>
+
+                        <!-- حقل الكمية اليومية في الإضافة -->
+            <div class="row">
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">عدد الأفراد في البطاقة</label>
+                <input type="number" class="form-control" [(ngModel)]="newDepartment.familyMembers"
+                  (input)="calculateMonthlyBread()" placeholder="عدد أفراد الأسرة" min="1" />
+                <small class="text-muted">سيتم حساب عدد الأرغفة تلقائياً (عدد الأفراد × 150)</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">عدد الأرغفة الشهرية</label>
+                <input type="number" class="form-control" [(ngModel)]="newDepartment.monthlyBread" placeholder="عدد الأرغفة"
+                  min="0" disabled />
+                <small class="text-muted text-primary">يتم حسابه تلقائياً</small>
+              </div>
+            </div>
+
+            <!-- حقل كلمة سر بطاقة التموين -->
+            <div class="row">
+               <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">رقم بطاقة التموين</label>
+                <input type="text" class="form-control" [(ngModel)]="newDepartment.rationCardNumber"
+                  placeholder="رقم بطاقة التموين" />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">
+                  <i class="bi bi-lock text-secondary me-1"></i>
+                  كلمة سر بطاقة التموين
+                </label>
+                <div class="position-relative">
+                  <input class="form-control"
+                    [(ngModel)]="newDepartment.rationCardPassword" placeholder="كلمة سر بطاقة التموين" />
+                                  </div>
+                <small class="text-muted">أدخل كلمة السر الخاصة ببطاقة التموين</small>
+              </div>
+
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">العنوان بالتفصيل</label>
+                <input type="text" class="form-control" [(ngModel)]="newDepartment.address" placeholder="  ادخل العنوان بالتفصيل" />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">
+                  <i class="bi bi-shop me-1"></i>
+                  منفذ صرف التموين
+                </label>
+                <input type="text" class="form-control" [(ngModel)]="newDepartment.rationOutlet"
+                  placeholder="اسم منفذ صرف التموين" />
+              </div>
+            </div>
+
+            <hr class="my-3">
+
+            <!-- رفع الصور -->
+            <h6 class="text-muted mb-3">
+              <i class="bi bi-images me-2"></i>
+              رفع المستندات
+            </h6>
+
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <label class="form-label text-muted">صورة بطاقة التموين</label>
+                <div class="upload-box" (click)="triggerFileInput('rationCardImage')"
+                  [class.has-image]="newDepartment.rationCardImage">
+                  <input type="file" #rationCardImageInput (change)="onFileSelected($event, 'rationCardImage')"
+                    accept="image/*" style="display: none;" />
+                  <div *ngIf="!newDepartment.rationCardImage" class="upload-placeholder">
+                    <i class="bi bi-cloud-upload fs-2 d-block mb-2"></i>
+                    <span>اضغط لرفع الصورة</span>
+                    <small class="text-muted d-block">jpg, png, jpeg</small>
+                  </div>
+                  <div *ngIf="newDepartment.rationCardImage" class="upload-preview">
+                    <img [src]="newDepartment.rationCardImage" alt="بطاقة التموين" class="img-fluid rounded" />
+                    <button class="btn btn-danger btn-sm remove-image"
+                      (click)="removeImage('rationCardImage'); $event.stopPropagation()">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closeAddDepartment()">إلغاء</button>
+            <button class="btn btn-primary" (click)="saveDepartment()">
+              <i class="bi bi-check2 me-1"></i> إنشاء حساب
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== مودال تعديل المستخدم (عميل عادي) ====== -->
+    <div *ngIf="showEditUserModal" class="modal fade show d-block modal-backdrop-custom">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-warning">
+            <h5 class="modal-title">
+              <i class="bi bi-pencil-square text-dark me-2"></i>
+              تعديل المستخدم
+            </h5>
+            <button type="button" class="btn-close" (click)="closeEditUser()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">الاسم </label>
+                <input type="text" class="form-control" [(ngModel)]="selectedUser.fullname" />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">اسم المستخدم</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedUser.username" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">كلمة المرور الجديدة (اختياري)</label>
+                <div class="position-relative">
+                  <input [type]="showEditPassword ? 'text' : 'password'" class="form-control"
+                    [(ngModel)]="selectedUser.newPassword" placeholder="اتركه فارغاً للحفاظ على كلمة المرور الحالية" />
+                  <i class="bi password-toggle-icon" [ngClass]="showEditPassword ? 'bi-eye-slash' : 'bi-eye'"
+                    (click)="toggleEditPassword()"
+                    style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                  </i>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">رقم الهاتف</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedUser.phone" />
+              </div>
+            </div>
+
+            <!-- حقل كلمة سر بطاقة التموين في التعديل -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">
+                  <i class="bi bi-lock text-secondary me-1"></i>
+                  كلمة سر بطاقة التموين <span class="text-muted">(اختياري)</span>
+                </label>
+                <div class="position-relative">
+                  <input [type]="showEditRationCardPassword ? 'text' : 'password'" class="form-control"
+                    [(ngModel)]="selectedUser.rationCardPassword" placeholder="كلمة سر بطاقة التموين" />
+                  <i class="bi password-toggle-icon" [ngClass]="showEditRationCardPassword ? 'bi-eye-slash' : 'bi-eye'"
+                    (click)="showEditRationCardPassword = !showEditRationCardPassword"
+                    style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                  </i>
+                </div>
+                <small class="text-muted">اتركه فارغاً إذا لم ترغب في تغيير كلمة السر</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">رقم بطاقة التموين</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedUser.rationCardNumber" />
+              </div>
+            </div>
+
+            <!-- حقل الكمية اليومية في التعديل -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">
+                  <i class="bi bi-bread text-warning me-1"></i>
+                  الكمية اليومية
+                </label>
+                <input type="number" class="form-control" [(ngModel)]="selectedUser.dailyBreadQuantity" min="0" />
+                <small class="text-muted">الكمية التي سيتم صرفها يومياً</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">عدد الأفراد <span class="text-primary">(سيتم حساب الأرغفة تلقائياً)</span></label>
+                <input type="number" class="form-control" [(ngModel)]="selectedUser.familyMembers"
+                  (input)="calculateEditMonthlyBread()" min="1" />
+                <small class="text-muted">عدد الأفراد × 150 = عدد الأرغفة الشهرية</small>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">عدد الأرغفة الشهرية</label>
+                <input type="number" class="form-control" [(ngModel)]="selectedUser.monthlyBread" min="0" disabled
+                  style="background-color: #f0f0f0;" />
+                <small class="text-primary">يتم حسابه تلقائياً من عدد الأفراد</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">العنوان</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedUser.address" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">منفذ صرف التموين</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedUser.rationOutlet"
+                  placeholder="اسم منفذ صرف التموين" />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">الرقم القومي</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedUser.nationalId" />
+              </div>
+            </div>
+
+            <hr class="my-3">
+
+            <!-- رفع الصور في التعديل -->
+            <h6 class="text-muted mb-3">
+              <i class="bi bi-images me-2"></i>
+              المستندات
+            </h6>
+
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label text-muted">صورة البطاقة (الوجه)</label>
+                <div class="upload-box small-upload" (click)="triggerFileInput('editNationalIdImage')"
+                  [class.has-image]="selectedUser.nationalIdImage">
+                  <input type="file" #editNationalIdImageInput (change)="onFileSelected($event, 'editNationalIdImage')"
+                    accept="image/*" style="display: none;" />
+                  <div *ngIf="!selectedUser.nationalIdImage" class="upload-placeholder">
+                    <i class="bi bi-cloud-upload fs-3"></i>
+                  </div>
+                  <div *ngIf="selectedUser.nationalIdImage" class="upload-preview">
+                    <img [src]="selectedUser.nationalIdImage" alt="صورة البطاقة" class="img-fluid rounded" />
+                    <button class="btn btn-danger btn-sm remove-image"
+                      (click)="removeImage('editNationalIdImage'); $event.stopPropagation()">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label class="form-label text-muted">صورة البطاقة (الظهر)</label>
+                <div class="upload-box small-upload" (click)="triggerFileInput('editNationalIdImageBack')"
+                  [class.has-image]="selectedUser.nationalIdImageBack">
+                  <input type="file" #editNationalIdImageBackInput
+                    (change)="onFileSelected($event, 'editNationalIdImageBack')" accept="image/*" style="display: none;" />
+                  <div *ngIf="!selectedUser.nationalIdImageBack" class="upload-placeholder">
+                    <i class="bi bi-cloud-upload fs-3"></i>
+                  </div>
+                  <div *ngIf="selectedUser.nationalIdImageBack" class="upload-preview">
+                    <img [src]="selectedUser.nationalIdImageBack" alt="ظهر البطاقة" class="img-fluid rounded" />
+                    <button class="btn btn-danger btn-sm remove-image"
+                      (click)="removeImage('editNationalIdImageBack'); $event.stopPropagation()">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label class="form-label text-muted">صورة بطاقة التموين</label>
+                <div class="upload-box small-upload" (click)="triggerFileInput('editRationCardImage')"
+                  [class.has-image]="selectedUser.rationCardImage">
+                  <input type="file" #editRationCardImageInput (change)="onFileSelected($event, 'editRationCardImage')"
+                    accept="image/*" style="display: none;" />
+                  <div *ngIf="!selectedUser.rationCardImage" class="upload-placeholder">
+                    <i class="bi bi-cloud-upload fs-3"></i>
+                  </div>
+                  <div *ngIf="selectedUser.rationCardImage" class="upload-preview">
+                    <img [src]="selectedUser.rationCardImage" alt="بطاقة التموين" class="img-fluid rounded" />
+                    <button class="btn btn-danger btn-sm remove-image"
+                      (click)="removeImage('editRationCardImage'); $event.stopPropagation()">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closeEditUser()">إلغاء</button>
+            <button class="btn btn-primary" (click)="confirmEditUser()">
+              <i class="bi bi-check2 me-1"></i> حفظ التغييرات
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== مودال تعديل المدير ====== -->
+    <div *ngIf="showEditAdminModal" class="modal fade show d-block modal-backdrop-custom">
+      <div class="modal-dialog modal-md">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title text-white">
+              <i class="bi bi-pencil-square text-white me-2"></i>
+              تعديل المدير
+            </h5>
+            <button type="button" class="btn-close btn-close-white" (click)="closeEditAdmin()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-bold">الاسم <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="selectedAdmin.fullname" placeholder="الاسم " />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">اسم المستخدم <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="selectedAdmin.username" placeholder="اسم المستخدم" />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">كلمة المرور الجديدة <span class="text-muted">(اختياري)</span></label>
+              <div class="position-relative">
+                <input [type]="showEditAdminPassword ? 'text' : 'password'" class="form-control"
+                  [(ngModel)]="selectedAdmin.newPassword" placeholder="اتركه فارغاً للحفاظ على كلمة المرور الحالية" />
+                <i class="bi password-toggle-icon" [ngClass]="showEditAdminPassword ? 'bi-eye-slash' : 'bi-eye'"
+                  (click)="toggleEditAdminPassword()"
+                  style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                </i>
+              </div>
+              <small class="text-muted">اتركه فارغاً إذا لم ترغب في تغيير كلمة المرور</small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closeEditAdmin()">إلغاء</button>
+            <button class="btn btn-primary" (click)="confirmEditAdmin()">
+              <i class="bi bi-check2 me-1"></i> حفظ التغييرات
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

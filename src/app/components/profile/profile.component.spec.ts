@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ArchivesComponent } from './archives.component';
+import { ProfileComponent } from './profile.component';
 
-describe('ArchivesComponent', () => {
-  let component: ArchivesComponent;
-  let fixture: ComponentFixture<ArchivesComponent>;
+describe('ProfileComponent', () => {
+  let component: ProfileComponent;
+  let fixture: ComponentFixture<ProfileComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ArchivesComponent]
+      declarations: [ProfileComponent]
     });
-    fixture = TestBed.createComponent(ArchivesComponent);
+    fixture = TestBed.createComponent(ProfileComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

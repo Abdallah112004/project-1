@@ -2,15 +2,9 @@
   <div class="overlay"></div>
 
   <div class="card login-card shadow-lg p-4 text-center">
-    <div class="mb-4 position-relative">
-      <div class="icon-circle mx-auto mb-3">
-        <i class="bi bi-people-fill fs-1"></i>
-      </div>
-      <h4 class="fw-bold mb-1 text-primary">نظام الأنشطة الجامعية</h4>
-      <p class="text-muted mb-4">منصة إدارة الإنجازات الجامعية</p>
-    </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="login()" novalidate>
+      <h3 class="mb-4 fw-bold">تسجيل الدخول</h3>
       <div class="mb-3 text-end">
         <label class="form-label fw-semibold">اسم المستخدم</label>
         <div class="position-relative">
@@ -60,11 +54,6 @@
       </div>
     </form>
 
-    <hr class="my-4" />
 
-    <div class="text-muted small">
-      © 2025 جامعة قنا<br />
-      <i class="bi bi-bank me-1"></i> الجهة المطوّرة: كلية الحاسبات والمعلومات
-    </div>
   </div>
 </div>

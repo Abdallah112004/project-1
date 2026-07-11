@@ -15,8 +15,6 @@ export class LoginComponent implements OnInit {
   isLoading = false;
   showPassword: boolean = false;
 
-  private targetRoute: string = '/dashboard';
-
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -32,7 +30,7 @@ export class LoginComponent implements OnInit {
           Validators.maxLength(20),
         ],
       ],
-      password: ['', [Validators.required]], 
+      password: ['', [Validators.required]],
     });
   }
 
@@ -43,7 +41,7 @@ export class LoginComponent implements OnInit {
         this.loginService.getTokenFromLocalStorage()!
       )
     ) {
-      this.redirectToDashboard();
+      this.redirectAfterLoginCheck();
       return;
     }
 
@@ -101,7 +99,9 @@ export class LoginComponent implements OnInit {
             positionClass: 'toast-top-right',
             timeOut: 3000,
           });
-          this.redirectToDashboard();
+
+          // 👈 التوجيه حسب دور المستخدم
+          this.redirectAfterLogin(response.user);
         } else {
           this.errorMessage = 'لم يتم استلام بيانات الدخول بشكل صحيح.';
           this.toastr.error(this.errorMessage, 'خطأ', {
@@ -121,10 +121,33 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  private redirectToDashboard(): void {
-    setTimeout(() => {
-      this.router.navigate([this.targetRoute]);
-    }, 100);
+  // ====== التوجيه بعد تسجيل الدخول ======
+  private redirectAfterLogin(user: any): void {
+    // إذا كان المستخدم عميل (client) → افتح الملف الشخصي
+    if (user.role === 'client') {
+      setTimeout(() => {
+        this.router.navigate(['/profile', user._id]);
+      }, 100);
+    } else {
+      // المديرين والمستخدمين الآخرين يذهبون إلى لوحة التحكم
+      setTimeout(() => {
+        this.router.navigate(['/administration']);
+      }, 100);
+    }
+  }
+
+  // ====== التحقق من التوجيه عند استعادة الجلسة ======
+  private redirectAfterLoginCheck(): void {
+    const user = this.loginService.getCurrentUser();
+    if (user) {
+      if (user.role === 'client') {
+        this.router.navigate(['/profile', user._id]);
+      } else {
+        this.router.navigate(['/administration']);
+      }
+    } else {
+      this.router.navigate(['/administration']);
+    }
   }
 
   private extractErrorMessage(error: any): string {
@@ -180,6 +203,7 @@ export class LoginComponent implements OnInit {
       supervisor: 'مشرف',
       user: 'مستخدم',
       student: 'طالب',
+      client: 'عميل',
     };
 
     return role ? roleNames[role] || role : 'زائر';

@@ -1,0 +1,336 @@
+/* ====== تنسيق صفحة الملف الشخصي ====== */
+.profile-page {
+  min-height: 100vh;
+  background-color: #f9fafc;
+  max-width: 82%;
+}
+
+.profile-header {
+  padding: 40px 0 0;
+}
+
+.profile-header h2 {
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  color: #1e1e2f;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.profile-actions .btn {
+  margin-top: 20px;
+  padding: 10px 24px;
+  font-size: 0.95rem;
+  border-radius: 8px;
+}
+
+.profile-card {
+  border-radius: 16px;
+  border: none;
+  overflow: hidden;
+}
+
+.profile-card .card-body {
+  padding: 24px;
+}
+
+/* ====== تنسيق عرض البيانات ====== */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-right: 3px solid #1e3a8a;
+  transition: all 0.3s ease;
+}
+
+.info-item:hover {
+  background: #f0f4ff;
+  transform: translateX(-2px);
+}
+
+.info-item .info-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.info-item .info-label i {
+  font-size: 0.9rem;
+}
+
+.info-item .info-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e1e2f;
+  word-break: break-word;
+}
+
+/* ====== تنسيق نموذج التعديل ====== */
+.profile-edit .form-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.profile-edit .form-control {
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 14px;
+  transition: all 0.3s ease;
+}
+
+.profile-edit .form-control:focus {
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+  outline: none;
+}
+
+.profile-edit .form-control:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.profile-edit small {
+  font-size: 0.75rem;
+  display: block;
+  margin-top: 4px;
+}
+
+/* ====== تنسيق الصور المصغرة ====== */
+.profile-images {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.image-thumbnail {
+  position: relative;
+  width: 65px;
+  height: 50px;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.image-thumbnail:hover {
+  border-color: #1e3a8a;
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+
+.image-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-thumbnail .image-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 0.45rem;
+  text-align: center;
+  padding: 2px 0;
+  font-weight: 500;
+}
+
+/* ====== تنسيق عارض الصور ====== */
+.image-viewer-modal .modal-dialog {
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.image-viewer-modal .modal-content {
+  background: #1a1a2e;
+  border: none;
+  border-radius: 16px;
+}
+
+.image-viewer-modal .modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.image-viewer-modal .modal-title {
+  color: #fff;
+}
+
+.image-viewer-modal .btn-close {
+  filter: invert(1);
+}
+
+.image-viewer-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  max-height: 70vh;
+  overflow: hidden;
+}
+
+.viewer-image {
+  max-height: 70vh;
+  max-width: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+  border-radius: 8px;
+}
+
+.image-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.image-controls .btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.image-controls .btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+/* ====== تنسيق البادج ====== */
+.badge {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.badge i {
+  margin-left: 4px;
+}
+
+/* ====== تنسيق الموبايل ====== */
+@media (max-width: 576px) {
+  .profile-card .card-body {
+    padding: 16px;
+  }
+
+  .profile-page {
+    max-width: 100%;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .info-item {
+    padding: 10px 14px;
+  }
+
+  .profile-actions {
+    flex-direction: column;
+  }
+
+  .profile-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .image-thumbnail {
+    width: 50px;
+    height: 38px;
+  }
+
+  .image-viewer-container {
+    min-height: 30vh;
+    max-height: 55vh;
+  }
+
+  .viewer-image {
+    max-height: 50vh;
+  }
+
+  .image-controls .btn {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 10px;
+  }
+
+  .profile-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 991px) {
+  .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .image-thumbnail {
+    width: 55px;
+    height: 42px;
+  }
+}
+
+/* ====== تحسينات إضافية ====== */
+.password-toggle-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 1.2rem;
+  background: none;
+  border: none;
+  padding: 5px;
+  z-index: 10;
+  transition: color 0.3s ease;
+}
+
+.password-toggle-icon:hover {
+  color: #374151;
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
