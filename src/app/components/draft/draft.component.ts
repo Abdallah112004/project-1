@@ -230,17 +230,19 @@ export class DraftsComponent implements OnInit {
     return attachment.toLowerCase().includes('.pdf');
   }
 
-  getFullAttachmentUrl(attachment: string): string {
-    if (!attachment) return '';
+getFullAttachmentUrl(path: string): string {
+  if (!path) return '';
 
-    if (attachment.startsWith('http')) {
-      return attachment;
-    } else if (attachment.startsWith('/')) {
-      return environment.baseUrl + attachment;
-    } else {
-      return environment.baseUrl + '/uploads/' + attachment;
-    }
+  if (path.startsWith('http')) {
+    return path;
   }
+
+  if (path.startsWith('/')) {
+    return environment.baseUrl + path;
+  }
+
+  return environment.baseUrl + '/uploads/' + path;
+}
 
   openImageModal(attachment: string): void {
     this.selectedImage = this.getFullAttachmentUrl(attachment);

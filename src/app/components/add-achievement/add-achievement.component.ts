@@ -788,11 +788,19 @@ export class AddAchievementComponent implements OnInit {
   isImageFile(file: File): boolean {
     return ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'].includes(file?.name.split('.').pop()?.toLowerCase() || '');
   }
-  getFullAttachmentUrl(path: string): string {
-    if (!path) return '';
-    if (path.startsWith('http')) return path;
-    return `http://localhost:3000${path.startsWith('/') ? '' : 'uploads/'}${path}`;
-  }
+getFullAttachmentUrl(path: string): string {
+      if (!path) return '';
+
+      if (path.startsWith('http')) {
+        return path;
+      }
+
+      if (path.startsWith('/uploads/')) {
+        return `http://www.svu.edu.eg:8093/api${path}`;
+      }
+
+      return `http://www.svu.edu.eg:8093/api/uploads/${path}`;
+    }
   getFilePreview(file: File): string { return this.isImageFile(file) ? URL.createObjectURL(file) : ''; }
   viewAttachment(url: string): void { window.open(this.getFullAttachmentUrl(url), '_blank'); }
 
